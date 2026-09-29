@@ -1,0 +1,1061 @@
+{
+ "dialogue": [
+  {
+   "role": "tutor",
+   "content": "Здравствуйте! Давайте закрепим материал про OKR. Лекций не будет: я задаю вопросы, вы рассуждаете вслух. Ошибаться можно и даже полезно — так понимание становится прочнее. К концу разговора вы сможете сами составить OKR и объяснить, чем он отличается от KPI.\n\nКак бы вы объяснили коллеге, который ни разу не слышал про OKR, что это и зачем компании этим пользоваться?"
+  },
+  {
+   "role": "student",
+   "content": "ОКР — это когда ставятся чёткие цели с конкретными цифрами, и есть план, как их достичь. Цель должна звучать как \"сделать выручку больше на 20%\", а потом уже пишешь список задач — типа запустить рекламу, нанять новых сотрудников, улучшить сайт. Нам это нужно, чтобы все знали, чего надо добиться за квартал. А потом смотришь результат и понимаешь, выполнило ли подразделение или компания то, что запланировало."
+  },
+  {
+   "role": "tutor",
+   "content": "Представьте, что цель звучит как «Выручка +20%». Вдохновит ли такая формулировка бариста или курьера?",
+   "move": "counterexample",
+   "move_label": "Контрпример (эленхос)",
+   "phase": "explore",
+   "target": "objective",
+   "latency": 11.7,
+   "tokens": 2390,
+   "regenerated": false,
+   "fallback": false,
+   "analysis": {
+    "intent": "answer",
+    "verdict": "incorrect",
+    "covered_points": [],
+    "evidence": [
+     {
+      "concept": "essence",
+      "verdict": "incorrect"
+     },
+     {
+      "concept": "objective",
+      "verdict": "incorrect"
+     },
+     {
+      "concept": "key_results",
+      "verdict": "incorrect"
+     },
+     {
+      "concept": "vs_kpi",
+      "verdict": "incorrect"
+     },
+     {
+      "concept": "seventy",
+      "verdict": "incorrect"
+     },
+     {
+      "concept": "cycle",
+      "verdict": "partially_correct"
+     }
+    ],
+    "misconceptions": [
+     {
+      "id": "numbers_in_objective",
+      "quote": "Цель должна звучать как \"сделать выручку больше на 20%\""
+     },
+     {
+      "id": "kr_are_tasks",
+      "quote": "запустить рекламу, нанять новых сотрудников, улучшить сайт"
+     },
+     {
+      "id": "okr_equals_kpi",
+      "quote": "ставятся чёткие цели с конкретными цифрами, и есть план, как их достичь"
+     },
+     {
+      "id": "hundred_is_ideal",
+      "quote": "смотришь результат и понимаешь, выполнило ли подразделение или компания то, что запланировало"
+     },
+     {
+      "id": "rigid_annual",
+      "quote": "чего надо добиться за квартал"
+     }
+    ],
+    "resolved": [],
+    "depth": 1,
+    "affect": "neutral",
+    "question_reveals_target": false,
+    "student_quote": "",
+    "diagnosis": "Путает Objective и Key Results, считает OKR списком задач, не понимает связь с ежедневной работой сотрудников"
+   },
+   "stages": [
+    {
+     "key": "analyze",
+     "label": "Диагностика",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 9.13,
+     "queued": 0.0,
+     "prompt_tokens": 411,
+     "completion_tokens": 476,
+     "cached_tokens": 2240,
+     "note": ""
+    },
+    {
+     "key": "plan",
+     "label": "Политика",
+     "model": "правила",
+     "latency": 0.0,
+     "queued": 0.0,
+     "prompt_tokens": 0,
+     "completion_tokens": 0,
+     "cached_tokens": 0,
+     "note": "Контрпример (эленхос)"
+    },
+    {
+     "key": "generate",
+     "label": "Генерация",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 1.22,
+     "queued": 0.0,
+     "prompt_tokens": 896,
+     "completion_tokens": 31,
+     "cached_tokens": 823,
+     "note": ""
+    },
+    {
+     "key": "verify",
+     "label": "Проверка",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 1.36,
+     "queued": 0.0,
+     "prompt_tokens": 522,
+     "completion_tokens": 54,
+     "cached_tokens": 448,
+     "note": "ok"
+    }
+   ]
+  },
+  {
+   "role": "student",
+   "content": "Ну, честно говоря, навряд ли её сильно замотивирует. Обычно такие цифры интересуют руководство, а для конкретных исполнителей лучше придумать что-то более понятное и близкое, связанное с их работой. Может, стоит добавить что-то про качество обслуживания или скорость доставки? Тогда и курьеру интереснее будет."
+  },
+  {
+   "role": "tutor",
+   "content": "Верно подмечено: сотрудникам важно видеть свою роль в общей цели. Значит, цель должна быть сформулирована так, чтобы каждый понимал, как именно он влияет на её достижение. Но пока мы говорим о цифрах. Вспомните, как в тексте описано, каким должно быть Objective?",
+   "move": "hint",
+   "move_label": "Подсказка · ур. 1",
+   "phase": "explore",
+   "target": "objective",
+   "latency": 5.8,
+   "tokens": 3354,
+   "regenerated": true,
+   "fallback": false,
+   "analysis": {
+    "intent": "answer",
+    "verdict": "partially_correct",
+    "covered_points": [
+     4
+    ],
+    "evidence": [],
+    "misconceptions": [
+     {
+      "id": "numbers_in_objective",
+      "quote": "«Выручка +20%»"
+     }
+    ],
+    "resolved": [
+     "numbers_in_objective"
+    ],
+    "depth": 2,
+    "affect": "engaged",
+    "question_reveals_target": false,
+    "student_quote": "",
+    "diagnosis": "Ученик понял, что цель должна быть понятна каждому сотруднику, но не раскрыл другие аспекты Objective"
+   },
+   "stages": [
+    {
+     "key": "analyze",
+     "label": "Диагностика",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 3.45,
+     "queued": 0.0,
+     "prompt_tokens": 1738,
+     "completion_tokens": 163,
+     "cached_tokens": 947,
+     "note": ""
+    },
+    {
+     "key": "plan",
+     "label": "Политика",
+     "model": "правила",
+     "latency": 0.0001,
+     "queued": 0.0,
+     "prompt_tokens": 0,
+     "completion_tokens": 0,
+     "cached_tokens": 0,
+     "note": "Подсказка · ур. 1"
+    },
+    {
+     "key": "generate",
+     "label": "Генерация",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 1.03,
+     "queued": 0.0,
+     "prompt_tokens": 990,
+     "completion_tokens": 34,
+     "cached_tokens": 834,
+     "note": ""
+    },
+    {
+     "key": "regenerate",
+     "label": "Перегенерация",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 1.32,
+     "queued": 0.0,
+     "prompt_tokens": 368,
+     "completion_tokens": 61,
+     "cached_tokens": 1501,
+     "note": "Вопрос должен стоять в самом конце реплики."
+    }
+   ]
+  },
+  {
+   "role": "student",
+   "content": "Вроде бы там было написано, что Objective должен быть амбициозным, но достижимым. И что цифра в нём показывает направление, куда стремится компания. Но вот насчёт мотивации сотрудников вы правы, наверное, цель должна быть не просто цифрой, а ещё и вдохновлять."
+  },
+  {
+   "role": "tutor",
+   "content": "Вы упомянули, что Objective должен быть амбициозным и вдохновляющим. Но вспомните, сказано ли в тексте, что Objective обязательно содержит цифры?",
+   "move": "hint",
+   "move_label": "Подсказка · ур. 2",
+   "phase": "explore",
+   "target": "objective",
+   "latency": 5.1,
+   "tokens": 1960,
+   "regenerated": false,
+   "fallback": false,
+   "analysis": {
+    "intent": "answer",
+    "verdict": "partially_correct",
+    "covered_points": [
+     2,
+     3
+    ],
+    "evidence": [],
+    "misconceptions": [
+     {
+      "id": "numbers_in_objective",
+      "quote": "цифра в нём показывает направление"
+     }
+    ],
+    "resolved": [],
+    "depth": 1,
+    "affect": "confused",
+    "question_reveals_target": false,
+    "student_quote": "",
+    "diagnosis": "Путает Objective и Key Results, не понимает, что Objective без цифр"
+   },
+   "stages": [
+    {
+     "key": "analyze",
+     "label": "Диагностика",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 2.85,
+     "queued": 0.0,
+     "prompt_tokens": 307,
+     "completion_tokens": 146,
+     "cached_tokens": 2534,
+     "note": ""
+    },
+    {
+     "key": "plan",
+     "label": "Политика",
+     "model": "правила",
+     "latency": 0.0001,
+     "queued": 0.0,
+     "prompt_tokens": 0,
+     "completion_tokens": 0,
+     "cached_tokens": 0,
+     "note": "Подсказка · ур. 2"
+    },
+    {
+     "key": "generate",
+     "label": "Генерация",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 0.88,
+     "queued": 0.0,
+     "prompt_tokens": 1143,
+     "completion_tokens": 32,
+     "cached_tokens": 833,
+     "note": ""
+    },
+    {
+     "key": "verify",
+     "label": "Проверка",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 1.37,
+     "queued": 0.0,
+     "prompt_tokens": 279,
+     "completion_tokens": 53,
+     "cached_tokens": 610,
+     "note": "ok"
+    }
+   ]
+  },
+  {
+   "role": "student",
+   "content": "Теперь, когда вы это сказали, кажется, не так уж четко про цифры и было. Вроде говорили, что Objective должен быть измеримым, но необязательно с конкретной цифрой в названии. Может, я поспешил с выводами."
+  },
+  {
+   "role": "tutor",
+   "content": "Верно: Objective — это качественное описание направления, а не количественная метрика. Цифры появляются позже, в Key Results. Что ещё, помимо амбициозности и вдохновения, указано в тексте как свойство Objective?",
+   "move": "hint",
+   "move_label": "Подсказка · ур. 3",
+   "phase": "explore",
+   "target": "objective",
+   "latency": 6.91,
+   "tokens": 2268,
+   "regenerated": false,
+   "fallback": false,
+   "analysis": {
+    "intent": "answer",
+    "verdict": "partially_correct",
+    "covered_points": [
+     4
+    ],
+    "evidence": [],
+    "misconceptions": [
+     {
+      "id": "numbers_in_objective",
+      "quote": "Вроде говорили, что Objective должен быть измеримым, но необязательно с конкретной цифрой в названии"
+     }
+    ],
+    "resolved": [
+     "numbers_in_objective"
+    ],
+    "depth": 2,
+    "affect": "confused",
+    "question_reveals_target": false,
+    "student_quote": "",
+    "diagnosis": "Ученик понял, что цифры не обязательны, но ещё не сформулировал чётко, что Objective — качественное, вдохновляющее, без цифр"
+   },
+   "stages": [
+    {
+     "key": "analyze",
+     "label": "Диагностика",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 3.98,
+     "queued": 0.0,
+     "prompt_tokens": 501,
+     "completion_tokens": 182,
+     "cached_tokens": 2305,
+     "note": ""
+    },
+    {
+     "key": "plan",
+     "label": "Политика",
+     "model": "правила",
+     "latency": 0.0,
+     "queued": 0.0,
+     "prompt_tokens": 0,
+     "completion_tokens": 0,
+     "cached_tokens": 0,
+     "note": "Подсказка · ур. 3"
+    },
+    {
+     "key": "generate",
+     "label": "Генерация",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 1.54,
+     "queued": 0.0,
+     "prompt_tokens": 1240,
+     "completion_tokens": 46,
+     "cached_tokens": 833,
+     "note": ""
+    },
+    {
+     "key": "verify",
+     "label": "Проверка",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 1.4,
+     "queued": 0.0,
+     "prompt_tokens": 246,
+     "completion_tokens": 53,
+     "cached_tokens": 617,
+     "note": "ok"
+    }
+   ]
+  },
+  {
+   "role": "student",
+   "content": "Да, точно помню, что Objective должен быть ещё и краткосрочным, на квартал где-то. Ещё было что-то про ясность и согласованность во всей компании. Всё должны понимать одинаково."
+  },
+  {
+   "role": "tutor",
+   "content": "Вы правильно отметили согласованность и ясность, но перепутали с циклом. Подумайте: если OKR ставят на год, и менять их по ходу нельзя, что будет с командой, которая весь год идёт к цели, хотя через два месяца стало ясно, что гипотеза неверна?",
+   "move": "counterexample",
+   "move_label": "Контрпример (эленхос)",
+   "phase": "explore",
+   "target": "cycle",
+   "latency": 8.92,
+   "tokens": 3130,
+   "regenerated": true,
+   "fallback": false,
+   "analysis": {
+    "intent": "answer",
+    "verdict": "partially_correct",
+    "covered_points": [
+     3
+    ],
+    "evidence": [],
+    "misconceptions": [
+     {
+      "id": "rigid_annual",
+      "quote": "краткосрочным, на квартал где-то"
+     }
+    ],
+    "resolved": [],
+    "depth": 1,
+    "affect": "engaged",
+    "question_reveals_target": false,
+    "student_quote": "",
+    "diagnosis": "Правильно отметил согласованность и ясность, но перепутал с циклом. Не хватает «без цифр»."
+   },
+   "stages": [
+    {
+     "key": "analyze",
+     "label": "Диагностика",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 3.25,
+     "queued": 0.0,
+     "prompt_tokens": 465,
+     "completion_tokens": 155,
+     "cached_tokens": 2309,
+     "note": ""
+    },
+    {
+     "key": "plan",
+     "label": "Политика",
+     "model": "правила",
+     "latency": 0.0001,
+     "queued": 0.0,
+     "prompt_tokens": 0,
+     "completion_tokens": 0,
+     "cached_tokens": 0,
+     "note": "Контрпример (эленхос)"
+    },
+    {
+     "key": "generate",
+     "label": "Генерация",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 2.26,
+     "queued": 0.0,
+     "prompt_tokens": 1297,
+     "completion_tokens": 65,
+     "cached_tokens": 835,
+     "note": ""
+    },
+    {
+     "key": "verify",
+     "label": "Проверка",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 1.92,
+     "queued": 0.0,
+     "prompt_tokens": 278,
+     "completion_tokens": 85,
+     "cached_tokens": 629,
+     "note": "отклонено"
+    },
+    {
+     "key": "regenerate",
+     "label": "Перегенерация",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 1.49,
+     "queued": 0.0,
+     "prompt_tokens": 724,
+     "completion_tokens": 61,
+     "cached_tokens": 1491,
+     "note": "Черновик раскрывает ответ — задай наводящий вопрос вместо ответа. Раскрывает, что цикл планирования — обычно квартал. Уч"
+    }
+   ]
+  },
+  {
+   "role": "student",
+   "content": "Тогда ребята будут чувствовать себя обманутыми или потерянными, продолжая делать что-то, что уже не работает. Кажется, теперь понятно, почему цикл должен быть короче, чтобы была возможность корректировать курс."
+  },
+  {
+   "role": "tutor",
+   "content": "Хорошо, двигаемся дальше. Почему, как вам кажется, компании вообще нужна отдельная система постановки целей — чего без неё не хватает?",
+   "move": "affirm_advance",
+   "move_label": "Подтверждение и переход",
+   "phase": "explore",
+   "target": "essence",
+   "latency": 7.27,
+   "tokens": 3377,
+   "regenerated": true,
+   "fallback": true,
+   "analysis": {
+    "intent": "answer",
+    "verdict": "correct",
+    "covered_points": [
+     1,
+     2,
+     3
+    ],
+    "evidence": [],
+    "misconceptions": [],
+    "resolved": [
+     "rigid_annual"
+    ],
+    "depth": 2,
+    "affect": "engaged",
+    "question_reveals_target": false,
+    "student_quote": "",
+    "diagnosis": "Понял гибкость квартального цикла и его связь с корректировкой целей"
+   },
+   "stages": [
+    {
+     "key": "analyze",
+     "label": "Диагностика",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 2.71,
+     "queued": 0.0,
+     "prompt_tokens": 601,
+     "completion_tokens": 123,
+     "cached_tokens": 2174,
+     "note": ""
+    },
+    {
+     "key": "plan",
+     "label": "Политика",
+     "model": "правила",
+     "latency": 0.0,
+     "queued": 0.0,
+     "prompt_tokens": 0,
+     "completion_tokens": 0,
+     "cached_tokens": 0,
+     "note": "Подтверждение и переход"
+    },
+    {
+     "key": "generate",
+     "label": "Генерация",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 1.24,
+     "queued": 0.0,
+     "prompt_tokens": 1381,
+     "completion_tokens": 40,
+     "cached_tokens": 823,
+     "note": ""
+    },
+    {
+     "key": "verify",
+     "label": "Проверка",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 2.01,
+     "queued": 0.0,
+     "prompt_tokens": 303,
+     "completion_tokens": 69,
+     "cached_tokens": 611,
+     "note": "отклонено"
+    },
+    {
+     "key": "regenerate",
+     "label": "Перегенерация",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 1.31,
+     "queued": 0.0,
+     "prompt_tokens": 824,
+     "completion_tokens": 36,
+     "cached_tokens": 1448,
+     "note": "Черновик раскрывает ответ — задай наводящий вопрос вместо ответа. Раскрывает суть OKR, нужно убрать упоминание Objective"
+    }
+   ]
+  },
+  {
+   "role": "student",
+   "content": "Наверное, без такой системы цели размываются, и люди начинают тянуть компанию в разные стороны. COKR помогает всем двигаться в одном направлении и чётко понимать, к чему стремимся и как будем мерить успех."
+  },
+  {
+   "role": "tutor",
+   "content": "Именно так: OKR помогают согласовать усилия и измерять прогресс. Теперь переходим к следующему элементу — Key Results. Если Objective — это «куда мы идём», то какую роль тогда играют Key Results?",
+   "move": "affirm_advance",
+   "move_label": "Подтверждение и переход",
+   "phase": "explore",
+   "target": "key_results",
+   "latency": 6.02,
+   "tokens": 2327,
+   "regenerated": false,
+   "fallback": false,
+   "analysis": {
+    "intent": "answer",
+    "verdict": "correct",
+    "covered_points": [
+     1,
+     2,
+     3
+    ],
+    "evidence": [],
+    "misconceptions": [],
+    "resolved": [
+     "hundred_is_ideal",
+     "kr_are_tasks",
+     "numbers_in_objective",
+     "okr_equals_kpi"
+    ],
+    "depth": 2,
+    "affect": "engaged",
+    "question_reveals_target": false,
+    "student_quote": "",
+    "diagnosis": "Ученик понял, что OKR помогает фокусироваться и согласовывать цели"
+   },
+   "stages": [
+    {
+     "key": "analyze",
+     "label": "Диагностика",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 3.25,
+     "queued": 0.0,
+     "prompt_tokens": 559,
+     "completion_tokens": 148,
+     "cached_tokens": 2174,
+     "note": ""
+    },
+    {
+     "key": "plan",
+     "label": "Политика",
+     "model": "правила",
+     "latency": 0.0,
+     "queued": 0.0,
+     "prompt_tokens": 0,
+     "completion_tokens": 0,
+     "cached_tokens": 0,
+     "note": "Подтверждение и переход"
+    },
+    {
+     "key": "generate",
+     "label": "Генерация",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 1.41,
+     "queued": 0.0,
+     "prompt_tokens": 1264,
+     "completion_tokens": 44,
+     "cached_tokens": 823,
+     "note": ""
+    },
+    {
+     "key": "verify",
+     "label": "Проверка",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 1.36,
+     "queued": 0.0,
+     "prompt_tokens": 257,
+     "completion_tokens": 55,
+     "cached_tokens": 626,
+     "note": "ok"
+    }
+   ]
+  },
+  {
+   "role": "student",
+   "content": "Так, секундочку... Key Results показывают, как именно мы туда придём. Это такие маркеры прогресса, которые доказывают, что мы реально движемся к нашей цели. Или не движемся."
+  },
+  {
+   "role": "tutor",
+   "content": "Зачем ограничивать число ключевых результатов тремя–пятью, а не записать все важные метрики?",
+   "move": "probe_clarify",
+   "move_label": "Уточняющий вопрос",
+   "phase": "explore",
+   "target": "key_results",
+   "latency": 5.2,
+   "tokens": 2640,
+   "regenerated": true,
+   "fallback": true,
+   "analysis": {
+    "intent": "answer",
+    "verdict": "partially_correct",
+    "covered_points": [
+     3
+    ],
+    "evidence": [],
+    "misconceptions": [],
+    "resolved": [],
+    "depth": 2,
+    "affect": "engaged",
+    "question_reveals_target": false,
+    "student_quote": "",
+    "diagnosis": "Ученик понял, что Key Results доказывают достижение цели, но упустил детали: количественные метрики, сложность, достижимость."
+   },
+   "stages": [
+    {
+     "key": "analyze",
+     "label": "Диагностика",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 2.84,
+     "queued": 0.0,
+     "prompt_tokens": 547,
+     "completion_tokens": 117,
+     "cached_tokens": 2061,
+     "note": ""
+    },
+    {
+     "key": "plan",
+     "label": "Политика",
+     "model": "правила",
+     "latency": 0.0001,
+     "queued": 0.0,
+     "prompt_tokens": 0,
+     "completion_tokens": 0,
+     "cached_tokens": 0,
+     "note": "Уточняющий вопрос"
+    },
+    {
+     "key": "generate",
+     "label": "Генерация",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 1.26,
+     "queued": 0.0,
+     "prompt_tokens": 1220,
+     "completion_tokens": 39,
+     "cached_tokens": 836,
+     "note": ""
+    },
+    {
+     "key": "regenerate",
+     "label": "Перегенерация",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 1.1,
+     "queued": 0.0,
+     "prompt_tokens": 681,
+     "completion_tokens": 36,
+     "cached_tokens": 1424,
+     "note": "В реплике больше одного вопроса — оставь ровно один."
+    }
+   ]
+  },
+  {
+   "role": "student",
+   "content": "Если записывать много метрик, можно утонуть в деталях и перестать видеть главное. Лимит в три–пять помогает сосредоточиться на самом важном и не распыляться."
+  },
+  {
+   "role": "tutor",
+   "content": "Можно ли считать ключевым результатом фразу «запустить рекламную кампанию» — и на чём держится ваш ответ?",
+   "move": "perspective",
+   "move_label": "Смена точки зрения",
+   "phase": "explore",
+   "target": "key_results",
+   "latency": 4.83,
+   "tokens": 1915,
+   "regenerated": false,
+   "fallback": false,
+   "analysis": {
+    "intent": "answer",
+    "verdict": "partially_correct",
+    "covered_points": [
+     2
+    ],
+    "evidence": [],
+    "misconceptions": [],
+    "resolved": [],
+    "depth": 2,
+    "affect": "engaged",
+    "question_reveals_target": false,
+    "student_quote": "",
+    "diagnosis": "Понял, что лимит помогает сфокусироваться на главном, но не объяснил, почему именно 3–5"
+   },
+   "stages": [
+    {
+     "key": "analyze",
+     "label": "Диагностика",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 2.5,
+     "queued": 0.0,
+     "prompt_tokens": 352,
+     "completion_tokens": 112,
+     "cached_tokens": 2193,
+     "note": ""
+    },
+    {
+     "key": "plan",
+     "label": "Политика",
+     "model": "правила",
+     "latency": 0.0001,
+     "queued": 0.0,
+     "prompt_tokens": 0,
+     "completion_tokens": 0,
+     "cached_tokens": 0,
+     "note": "Смена точки зрения"
+    },
+    {
+     "key": "generate",
+     "label": "Генерация",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 0.88,
+     "queued": 0.0,
+     "prompt_tokens": 1163,
+     "completion_tokens": 22,
+     "cached_tokens": 835,
+     "note": ""
+    },
+    {
+     "key": "verify",
+     "label": "Проверка",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 1.45,
+     "queued": 0.0,
+     "prompt_tokens": 213,
+     "completion_tokens": 53,
+     "cached_tokens": 610,
+     "note": "ok"
+    }
+   ]
+  },
+  {
+   "role": "student",
+   "content": "Нет, похоже, что «запустить рекламную кампанию» — это скорее задача, а не ключевой результат. Ключевой результат должен явно показывать прогресс к цели. Например, увеличение числа клиентов или продаж после кампании — это да, а запуск самой кампании — нет."
+  },
+  {
+   "role": "tutor",
+   "content": "Отличная логика! Вы поняли разницу между задачей и результатом. Переходим к сравнению с KPI. В чём главное отличие OKR от привычных KPI, если смотреть на то, кто и как ставит показатели?",
+   "move": "affirm_advance",
+   "move_label": "Подтверждение и переход",
+   "phase": "explore",
+   "target": "vs_kpi",
+   "latency": 5.46,
+   "tokens": 2040,
+   "regenerated": false,
+   "fallback": false,
+   "analysis": {
+    "intent": "answer",
+    "verdict": "partially_correct",
+    "covered_points": [
+     1,
+     3,
+     4
+    ],
+    "evidence": [],
+    "misconceptions": [],
+    "resolved": [],
+    "depth": 2,
+    "affect": "engaged",
+    "question_reveals_target": false,
+    "student_quote": "",
+    "diagnosis": "Отлично понял, что KR — это измеримые результаты, а не задачи; упустил пункт про количество (3–5)"
+   },
+   "stages": [
+    {
+     "key": "analyze",
+     "label": "Диагностика",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 2.54,
+     "queued": 0.0,
+     "prompt_tokens": 357,
+     "completion_tokens": 121,
+     "cached_tokens": 2193,
+     "note": ""
+    },
+    {
+     "key": "plan",
+     "label": "Политика",
+     "model": "правила",
+     "latency": 0.0001,
+     "queued": 0.0,
+     "prompt_tokens": 0,
+     "completion_tokens": 0,
+     "cached_tokens": 0,
+     "note": "Подтверждение и переход"
+    },
+    {
+     "key": "generate",
+     "label": "Генерация",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 1.65,
+     "queued": 0.0,
+     "prompt_tokens": 1204,
+     "completion_tokens": 44,
+     "cached_tokens": 823,
+     "note": ""
+    },
+    {
+     "key": "verify",
+     "label": "Проверка",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 1.27,
+     "queued": 0.0,
+     "prompt_tokens": 260,
+     "completion_tokens": 54,
+     "cached_tokens": 626,
+     "note": "ok"
+    }
+   ]
+  },
+  {
+   "role": "student",
+   "content": "OKR предполагает, что команды сами активно участвуют в постановке своих целей и показателей, а не просто получают их сверху. Это должно мотивировать людей больше, ведь они сами решают, как достигать целей."
+  },
+  {
+   "role": "tutor",
+   "content": "Верно подмечено: инициатива снизу стимулирует ответственность и вовлечённость. И последний важный момент — философия 70%. Представьте, команда три квартала подряд выполняет свои OKR на 100%. Руководитель доволен. Что бы по этому поводу сказал автор методики?",
+   "move": "affirm_advance",
+   "move_label": "Подтверждение и переход",
+   "phase": "explore",
+   "target": "seventy",
+   "latency": 6.42,
+   "tokens": 2239,
+   "regenerated": false,
+   "fallback": false,
+   "analysis": {
+    "intent": "answer",
+    "verdict": "partially_correct",
+    "covered_points": [
+     2,
+     3
+    ],
+    "evidence": [],
+    "misconceptions": [],
+    "resolved": [],
+    "depth": 2,
+    "affect": "engaged",
+    "question_reveals_target": false,
+    "student_quote": "",
+    "diagnosis": "Ученик понял, что команды сами предлагают показатели, и это мотивирует. Не упомянул жёсткость KPI."
+   },
+   "stages": [
+    {
+     "key": "analyze",
+     "label": "Диагностика",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 3.27,
+     "queued": 0.0,
+     "prompt_tokens": 501,
+     "completion_tokens": 115,
+     "cached_tokens": 2061,
+     "note": ""
+    },
+    {
+     "key": "plan",
+     "label": "Политика",
+     "model": "правила",
+     "latency": 0.0001,
+     "queued": 0.0,
+     "prompt_tokens": 0,
+     "completion_tokens": 0,
+     "cached_tokens": 0,
+     "note": "Подтверждение и переход"
+    },
+    {
+     "key": "generate",
+     "label": "Генерация",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 1.72,
+     "queued": 0.0,
+     "prompt_tokens": 1230,
+     "completion_tokens": 55,
+     "cached_tokens": 823,
+     "note": ""
+    },
+    {
+     "key": "verify",
+     "label": "Проверка",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 1.43,
+     "queued": 0.0,
+     "prompt_tokens": 283,
+     "completion_tokens": 55,
+     "cached_tokens": 626,
+     "note": "ok"
+    }
+   ]
+  },
+  {
+   "role": "student",
+   "content": "Автор методики, вероятно, сказал бы, что цели были недостаточно амбициозными. Если всегда выполняешь на 100%, значит, не тянешься к большему, не рискуешь и не растёшь."
+  },
+  {
+   "role": "tutor",
+   "content": "Вы уловили суть философии 70%! Амбиции и риск — необходимые условия для роста. Теперь давайте посмотрим на историю OKR. Как вы думаете, почему методика родилась именно в Intel, которая в 1970-х боролась за новый рынок микропроцессоров?",
+   "move": "affirm_advance",
+   "move_label": "Подтверждение и переход",
+   "phase": "explore",
+   "target": "origin",
+   "latency": 5.78,
+   "tokens": 2222,
+   "regenerated": false,
+   "fallback": false,
+   "analysis": {
+    "intent": "answer",
+    "verdict": "correct",
+    "covered_points": [
+     1,
+     2,
+     3
+    ],
+    "evidence": [],
+    "misconceptions": [],
+    "resolved": [],
+    "depth": 2,
+    "affect": "confident",
+    "question_reveals_target": false,
+    "student_quote": "",
+    "diagnosis": "Ученик понял философию 70%: амбиция, риск, рост. Нет заблуждений"
+   },
+   "stages": [
+    {
+     "key": "analyze",
+     "label": "Диагностика",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 2.59,
+     "queued": 0.0,
+     "prompt_tokens": 575,
+     "completion_tokens": 113,
+     "cached_tokens": 2061,
+     "note": ""
+    },
+    {
+     "key": "plan",
+     "label": "Политика",
+     "model": "правила",
+     "latency": 0.0002,
+     "queued": 0.0,
+     "prompt_tokens": 0,
+     "completion_tokens": 0,
+     "cached_tokens": 0,
+     "note": "Подтверждение и переход"
+    },
+    {
+     "key": "generate",
+     "label": "Генерация",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 1.74,
+     "queued": 0.0,
+     "prompt_tokens": 1114,
+     "completion_tokens": 58,
+     "cached_tokens": 960,
+     "note": ""
+    },
+    {
+     "key": "verify",
+     "label": "Проверка",
+     "model": "GigaChat-2-Max:2.0.28.2",
+     "latency": 1.46,
+     "queued": 0.0,
+     "prompt_tokens": 307,
+     "completion_tokens": 55,
+     "cached_tokens": 626,
+     "note": "ok"
+    }
+   ]
+  }
+ ],
+ "final_mastery": {
+  "essence": 0.74,
+  "objective": 0.988,
+  "key_results": 0.821,
+  "vs_kpi": 0.74,
+  "seventy": 0.74,
+  "cycle": 0.848,
+  "origin": 0.25,
+  "application": 0.25
+ },
+ "finished": false,
+ "phase": "explore",
+ "system": "pipeline",
+ "persona": "oleg",
+ "seed": 0,
+ "models": {
+  "analyzer": "GigaChat-2-Max",
+  "generator": "GigaChat-2-Max",
+  "verifier": "GigaChat-2-Max"
+ },
+ "student_model": "GigaChat-2-Pro",
+ "wall": 100.2
+}
