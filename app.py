@@ -158,7 +158,12 @@ def trace_block(t, tutor: Tutor) -> None:
         st.caption(stages)
 
 
-tutor = ensure_session()
+try:
+    tutor = ensure_session()
+except LLMError as e:
+    st.markdown('<header class="app-head"><div><h1>Майевтика</h1><div class="sub">Сократический тьютор на GigaChat</div></div></header>', unsafe_allow_html=True)
+    st.error(f"Тьютор не может подключиться к GigaChat: {e}. Если вы владелец приложения — добавьте GIGACHAT_CREDENTIALS в Settings → Secrets.")
+    st.stop()
 
 with st.sidebar:
     st.markdown('<div class="brand"><span class="mark">Μ</span><span>Майевтика</span></div>', unsafe_allow_html=True)
