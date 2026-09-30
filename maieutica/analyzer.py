@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 
 from .lesson import Lesson
-from .llm import GigaChat, LLMResult
+from .llm import GigaChat, LLMError, LLMResult, as_bool
 
 INTENTS = ["answer", "question", "ask_answer", "dont_know", "off_topic", "manipulation", "stop", "social"]
 VERDICTS = ["correct", "partially_correct", "incorrect", "not_applicable"]
@@ -100,24 +101,47 @@ class Analysis:
 
     @classmethod
     def from_args(cls, a: dict, lesson: Lesson, n_points: int) -> "Analysis":
+        # Аргументы пишет модель: поля бывают null, строкой вместо списка или числа, «false» вместо false.
         cids = {c.id for c in lesson.concepts}
         mids = {m.id for m in lesson.misconceptions} | {"other"}
         out = cls(
-            intent=a.get("intent") if a.get("intent") in INTENTS else "answer",
-            verdict=a.get("verdict") if a.get("verdict") in VERDICTS else "not_applicable",
-            covered_points=sorted({int(p) for p in a.get("covered_points", []) if str(p).isdigit() and 1 <= int(p) <= n_points}),
-            evidence=[e for e in a.get("evidence", []) if isinstance(e, dict) and e.get("concept") in cids and e.get("verdict") in VERDICTS[:3]],
-            misconceptions=[m for m in a.get("misconceptions", []) if isinstance(m, dict) and m.get("id") in mids],
-            resolved=[m for m in a.get("resolved", []) if m in mids],
-            depth=max(0, min(3, int(a.get("depth", 1) or 0))),
-            affect=a.get("affect") if a.get("affect") in AFFECTS else "neutral",
-            question_reveals_target=bool(a.get("question_reveals_target", False)),
+            intent=_choice(a.get("intent"), INTENTS, "answer"),
+            verdict=_choice(a.get("verdict"), VERDICTS, "not_applicable"),
+            covered_points=sorted({p for p in _numbers(a.get("covered_points")) if 1 <= p <= n_points}),
+            evidence=[e for e in _items(a.get("evidence")) if isinstance(e, dict) and _choice(e.get("concept"), cids, "") and _choice(e.get("verdict"), VERDICTS[:3], "")],
+            misconceptions=[m for m in _items(a.get("misconceptions")) if isinstance(m, dict) and _choice(m.get("id"), mids, "")],
+            resolved=[m for m in _items(a.get("resolved")) if _choice(m, mids, "")],
+            depth=max(0, min(3, (_numbers(a.get("depth")) or [1])[0])),
+            affect=_choice(a.get("affect"), AFFECTS, "neutral"),
+            question_reveals_target=as_bool(a.get("question_reveals_target", False)),
             student_quote=str(a.get("student_quote", ""))[:200],
             diagnosis=str(a.get("diagnosis", ""))[:400],
         )
         if out.intent != "answer" and out.verdict != "not_applicable" and out.intent not in ("question",):
             out.verdict = "not_applicable"
         return out
+
+
+def _items(x) -> list:
+    if isinstance(x, list):
+        return x
+    return [] if x is None or x == "" else [x]
+
+
+def _choice(x, allowed, default: str) -> str:
+    return x if isinstance(x, str) and x in allowed else default
+
+
+def _numbers(x) -> list[int]:
+    out = []
+    for v in _items(x):
+        if isinstance(v, bool):
+            continue
+        if isinstance(v, (int, float)):
+            out.append(int(v))
+        elif isinstance(v, str):
+            out += [int(d) for d in re.findall(r"\d+", v)]
+    return out
 
 
 def build_messages(lesson: Lesson, target_id: str, phase: str, tutor_msg: str, student_msg: str, history: list[dict], extra: str = "", active: list[str] | None = None) -> list[dict]:
@@ -158,4 +182,7 @@ def analyze(llm: GigaChat, model: str, lesson: Lesson, target_id: str, phase: st
         session_id=session_id,
     )
     n = len(lesson.concept(target_id).key_points)
-    return Analysis.from_args(res.args or {}, lesson, n), res
+    try:
+        return Analysis.from_args(res.args or {}, lesson, n), res
+    except (TypeError, ValueError, AttributeError) as e:
+        raise LLMError(f"Модель вернула диагностику в неожиданном виде: {str(res.args)[:150]}") from e

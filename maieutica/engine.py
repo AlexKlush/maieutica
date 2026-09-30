@@ -30,6 +30,8 @@ class Stage:
 
     @classmethod
     def from_result(cls, key: str, label: str, r: LLMResult, note: str = "") -> "Stage":
+        if r.requested:
+            note = "; ".join(x for x in (note, f"замена: {r.requested} недоступна") if x)
         return cls(key, label, r.model, round(r.latency, 2), round(r.queued, 2), r.usage.prompt, r.usage.completion, r.usage.cached, note)
 
 

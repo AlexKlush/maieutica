@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 
 from .analyzer import Analysis
 from .lesson import Lesson
-from .llm import GigaChat, LLMResult
+from .llm import GigaChat, LLMResult, as_bool
 from .policy import Plan
 
 EMOJI = re.compile("[\U0001F300-\U0001FAFF\U00002600-\U000027BF\U0001F000-\U0001F2FF]+")
@@ -19,7 +19,7 @@ SCHEMA = {
         "type": "object",
         "properties": {
             "reveals_answer": {"type": "boolean", "description": "Черновик прямо сообщает ученику ответ на текущий вопрос или называет ключевой пункт из списка «ещё не раскрыто»"},
-            "false_praise": {"type": "boolean", "description": "Черновик называет неверный или неполный ответ ученика верным/отличным"},
+            "false_praise": {"type": "boolean", "description": "Черновик называет неверный или неполный ответ ученика полностью верным или отличным. Признать верную часть ответа и прямо показать, чего не хватает, — НЕ ложная похвала"},
             "invented_facts": {"type": "boolean", "description": "Черновик сообщает факты, цифры, компании или даты, которых нет в тексте урока"},
             "ignores_move": {"type": "boolean", "description": "Черновик не выполняет заданный педагогический ход"},
             "comment": {"type": "string", "description": "Если есть нарушение — одно предложение, что исправить; иначе пусто"},
@@ -74,10 +74,15 @@ def llm_check(llm: GigaChat, model: str, lesson: Lesson, plan: Plan, a: Analysis
     c = lesson.concept(plan.target)
     covered = covered or set()
     missing = [p for i, p in enumerate(c.key_points, 1) if i not in covered]
+    note = ""
+    if plan.move == "affirm_advance":
+        prev = next((ln.split(":", 1)[1].strip() for ln in plan.materials.splitlines() if ln.startswith("Только что пройденное понятие")), "")
+        note = (f"\nОСОБЕННОСТЬ ХОДА: ученик только что освоил понятие «{prev}». Пересказ и похвала того, что ученик сам сказал о нём, — НЕ раскрытие ответа. "
+                f"Раскрытием считается только подсказка ответа на НОВЫЙ вопрос — о понятии «{c.title}».")
     user = f"""ТЕКСТ УРОКА
 {lesson.source_text}
 
-ПЕДАГОГИЧЕСКИЙ ХОД: {plan.label}. Раскрывать суть {'можно' if plan.reveal_allowed else 'нельзя'}.
+ПЕДАГОГИЧЕСКИЙ ХОД: {plan.label}. Раскрывать суть {'можно' if plan.reveal_allowed else 'нельзя'}.{note}
 Целевое понятие: {c.title}. Ученик ещё не раскрыл: {'; '.join(missing) or '—'}
 Оценка ответа ученика диагностикой: {('верно (понятие раскрыто по совокупности ответов)' if plan.move == 'affirm_advance' else a.verdict) if a else '—'}
 
@@ -92,15 +97,15 @@ def llm_check(llm: GigaChat, model: str, lesson: Lesson, plan: Plan, a: Analysis
     res = llm.chat([{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}], model=model, temperature=0.01, max_tokens=300, function=SCHEMA, session_id=session_id)
     r = res.args or {}
     issues = []
-    if r.get("reveals_answer") and not plan.reveal_allowed:
+    if as_bool(r.get("reveals_answer")) and not plan.reveal_allowed:
         issues.append("Черновик раскрывает ответ — задай наводящий вопрос вместо ответа.")
-    if r.get("false_praise") and a and a.verdict in ("incorrect", "partially_correct") and plan.move != "affirm_advance":
+    if as_bool(r.get("false_praise")) and a and a.verdict in ("incorrect", "partially_correct") and plan.move != "affirm_advance":
         issues.append("Черновик хвалит неверный или неполный ответ — будь честен и конкретен.")
-    if r.get("invented_facts"):
+    if as_bool(r.get("invented_facts")):
         issues.append("Черновик содержит факты вне текста урока — убери их.")
-    if plan.move == "bottom_out" and r.get("ignores_move"):
+    if plan.move == "bottom_out" and as_bool(r.get("ignores_move")):
         issues.append("Ход требует прямо объяснить суть из материалов — объясни, а не задавай наводящий вопрос.")
-    elif r.get("ignores_move"):
+    elif as_bool(r.get("ignores_move")):
         issues.append(f"Черновик не выполняет ход «{plan.label}».")
     if issues and r.get("comment"):
         issues.append(str(r["comment"])[:200])
