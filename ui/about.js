@@ -169,7 +169,7 @@
           </div>
         </section>
 
-        <footer class="ab-foot reveal">Росток · автор — Алексей Клушин · майевтика на GigaChat · исследование — research/REPORT.md (84 работы)</footer>
+        <footer class="ab-foot reveal">Росток · автор — Алексей Клушин (tg: <a href="https://t.me/lesha_kl" target="_blank" rel="noopener">@lesha_kl</a>) · майевтика на GigaChat · исследование — research/REPORT.md (84 работы)</footer>
       </div>`;
     built = true;
     wire();
