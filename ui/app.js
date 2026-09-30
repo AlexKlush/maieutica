@@ -123,6 +123,7 @@
     updateComposer();
     renderPanel(true);
     if (!$("#settings").hidden) updateSettings();
+    if (window.RostokAbout) window.RostokAbout.refresh();
     notice(st.notice);
   }
 
@@ -1001,7 +1002,8 @@
         <div class="seg" id="segAddr" role="group" aria-label="Обращение"><span class="thumb"></span><button type="button" data-v="вы">на «вы»</button><button type="button" data-v="ты">на «ты»</button></div>
         <p class="muted" id="addrNote"></p></section>
       <section class="sec"><label class="switch">Показывать «Почему такой вопрос» под ответами<input type="checkbox" id="traceSw"></label></section>
-      <section class="sec"><p class="muted" style="margin:0">Росток помогает разобраться в материале вопросами — как сократический диалог. Разборы хранятся в памяти сервера, пока приложение запущено, и видны только в этом браузере.</p></section>`;
+      <section class="sec"><p class="muted" style="margin:0">Росток помогает разобраться в материале вопросами — как сократический диалог. Разборы хранятся в памяти сервера, пока приложение запущено, и видны только в этом браузере.</p>
+        <button type="button" class="about-link" data-about>Как устроен Росток ${icon("chev-r")}</button></section>`;
     $$("#segTheme button").forEach((b) => b.addEventListener("click", () => applyTheme(b.dataset.v, b)));
     $$("#segAddr button").forEach((b) => b.addEventListener("click", () => {
       if (!S || b.dataset.v === S.settings.address) return;
@@ -1312,6 +1314,9 @@
     setTimeout(bye, kind === "ok" ? 4200 : 9000);
     el.addEventListener("click", bye);
   }
+
+  // Мост для about.js (страница «Как устроен Росток»)
+  window.Rostok = { state: () => S, esc, icon, LOGO, reduced, copyText, closeSettings };
 
   // ── старт ─────────────────────────────────────────────────────
   applyTheme(store.get("rs-theme", "auto"));

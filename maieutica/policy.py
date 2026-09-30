@@ -367,3 +367,13 @@ class Policy:
             plan.tags.append("empathy")
         elif a.affect in ("bored", "confident") and a.verdict == "correct":
             plan.empathy = "Ученик уверен и, возможно, ему скучно — сделай следующий вопрос практичнее и острее."
+            plan.tags.append("empathy")
+        elif a.intent == "dont_know":
+            plan.empathy = "Ученик честно сказал, что не знает. Одной фразой цени эту честность (сказать «не знаю» — нормальный шаг к пониманию) и сделай вопрос проще, без упрёка."
+            plan.tags.append("empathy")
+        elif a.verdict == "incorrect":
+            plan.empathy = "Ответ ошибочный, но за ним стоит попытка рассуждать. Сначала бережно признай ход мысли ученика (что в нём логично), и только потом веди к противоречию — без оценки «неверно»."
+            plan.tags.append("empathy")
+        elif a.depth >= 2 and a.verdict in ("correct", "partially_correct"):
+            plan.empathy = "Ученик рассуждает по-настоящему: объясняет «почему». Конкретно отметь именно это усилие мысли (не результат и не способности) одной фразой."
+            plan.tags.append("empathy")

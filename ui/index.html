@@ -180,6 +180,15 @@
   </aside>
 </div>
 
+<section class="about" id="about" role="dialog" aria-modal="true" aria-labelledby="aboutTitle" hidden>
+  <header class="about-bar">
+    <button class="ib" type="button" data-about-close aria-label="Назад"><svg class="i"><use href="#i-right" transform="rotate(180 12 12)"/></svg></button>
+    <nav class="about-nav" id="aboutNav" aria-label="Разделы"></nav>
+    <button class="ib" type="button" data-about-close aria-label="Закрыть"><svg class="i"><use href="#i-x"/></svg></button>
+  </header>
+  <div class="about-scroll" id="aboutScroll"></div>
+</section>
+
 <div class="modal" id="settings" role="dialog" aria-modal="true" aria-labelledby="h-settings" hidden>
   <div class="modal-card">
     <header><h2 id="h-settings">Настройки</h2><button class="ib" type="button" data-close aria-label="Закрыть"><svg class="i"><use href="#i-x"/></svg></button></header>
@@ -189,5 +198,6 @@
 <div class="toasts" id="toasts" aria-live="assertive"></div>
 <input type="file" id="file" accept=".txt,.md,.markdown,text/plain,text/markdown" hidden>
 <script src="app.js"></script>
+<script src="about.js"></script>
 </body>
 </html>

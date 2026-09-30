@@ -24,7 +24,7 @@ from urllib.parse import urlparse
 import streamlit as st
 import streamlit.components.v1 as components
 
-from maieutica import GigaChat, LLMError, load_lesson, materials
+from maieutica import GigaChat, LLMError, analyzer, compiler, generator, load_lesson, materials, verifier
 from maieutica.engine import Tutor, TurnTrace
 from maieutica.lesson import Lesson
 from maieutica.llm import FALLBACK_MODELS, SCOPES, find_credentials, normalize_key
@@ -328,6 +328,31 @@ def chat_state(chat: Chat) -> dict:
     }
 
 
+@st.cache_data(show_spinner=False)
+def about_prompts() -> list[dict]:
+    """Скрытые промпты всех LLM-ролей — как есть в коде, для страницы «Как устроен Росток»."""
+    okr = load_lesson("okr")
+    js = lambda d: json.dumps(d, ensure_ascii=False, indent=2)
+    return [
+        {"id": "tutor", "title": "Конституция тьютора", "role": "генерация реплики", "text": generator.CONSTITUTION},
+        {"id": "state", "title": "Состояние занятия", "role": "подставляется к конституции на каждом ходе", "text": generator.STATE},
+        {"id": "analyzer", "title": "Диагностика ответа", "role": "function calling: assess_student_turn",
+         "text": analyzer.SYSTEM + "\n\nСХЕМА ФУНКЦИИ\n" + js(analyzer.schema(okr))},
+        {"id": "verifier", "title": "Аудитор реплики", "role": "function calling: audit_tutor_reply", "text": verifier.SYSTEM + "\n\nСХЕМА ФУНКЦИИ\n" + js(verifier.SCHEMA)},
+        {"id": "compiler", "title": "Методист: карта урока", "role": "function calling: build_lesson_map", "text": compiler.SYSTEM + "\n\nСХЕМА ФУНКЦИИ\n" + js(compiler.FUNCTION)},
+        {"id": "writer", "title": "Автор конспектов", "role": "конспект по теме", "text": materials.WRITER},
+    ]
+
+
+def last_prompt(chat: Chat) -> str:
+    msgs = chat.tutor.last_prompt
+    if not msgs:
+        return ""
+    head = msgs[0]["content"]
+    tail = "\n\n".join(f"── {m['role']} ──\n{m['content']}" for m in msgs[1:])
+    return f"── system ──\n{head}\n\n{tail}".strip()
+
+
 def build_state() -> dict:
     client = st.session_state.get("client")
     chat = active_chat()
@@ -343,6 +368,7 @@ def build_state() -> dict:
         "examples": examples(),
         "connection": connection_state(),
         "settings": {"address": st.session_state.address, "model": current_models()["generator"]},
+        "about": {"prompts": about_prompts(), "last": last_prompt(chat) if chat else ""},
     }
 
 

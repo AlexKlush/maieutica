@@ -84,6 +84,7 @@ class Tutor:
         self.history: list[dict] = []
         self.traces: list[TurnTrace] = []
         self.finished = False
+        self.last_prompt: list[dict] = []  # что именно ушло генератору в последний раз (для страницы «Как устроен»)
 
     def start(self, generated: bool = False) -> TurnTrace:
         plan = self.policy.open_plan(self.lm)
@@ -267,6 +268,7 @@ class Tutor:
         return offline.analyze(self.lesson, self.state.target, self.state.phase, student, active, self._extra())
 
     def _generate(self, plan: Plan, a: Analysis | None, feedback: str = "", temperature: float = 0.55) -> LLMResult:
+        self.last_prompt = generator.build_messages(self.lesson, plan, a, self.lm, self.history, self.address, feedback)
         if self._online():
             try:
                 return generator.generate(self.llm, self.models["generator"], self.lesson, plan, a, self.lm, self.history, self.address, feedback=feedback, session_id=self.session_id, temperature=temperature)
