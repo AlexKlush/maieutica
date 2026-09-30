@@ -329,6 +329,10 @@ svg.i { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-widt
   transition: background-size 1.1s var(--ease-io);
 }
 .msg.tutor.current.settled .q { background-size: 100% .42em; }
+/* в тёмной теме полупрозрачный маркер превращается в болотную полосу — там вопрос подчёркиваем тонкой лаймовой линией */
+:root[data-theme="dark"] .q { background-image: linear-gradient(90deg, var(--lime), color-mix(in srgb, var(--lime) 55%, transparent));
+  background-position: 0 96%; background-size: 0% 1.5px; }
+:root[data-theme="dark"] .msg.tutor.current.settled .q { background-size: 100% 1.5px; }
 .reveal .c { display: inline-block; opacity: 0; animation: charIn .5s var(--ease) forwards; animation-delay: var(--d); white-space: pre; }
 .reveal .w { display: inline-block; white-space: nowrap; }
 .reveal.skip .c { animation-duration: .01s; animation-delay: 0s !important; }
