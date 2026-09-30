@@ -62,7 +62,7 @@ class TurnTrace:
 def last_question(text: str) -> str:
     import re
 
-    parts = re.split(r"(?<=[.!?…])\s+", text.strip())
+    parts = re.split(r"(?<=[.!?])\s+", text.strip())  # не на «…»: «и… какое ограничение?» — один вопрос
     qs = [p for p in parts if p.endswith("?")]
     return qs[-1] if qs else ""
 
