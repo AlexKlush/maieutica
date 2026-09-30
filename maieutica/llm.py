@@ -33,7 +33,7 @@ COOLDOWN = 45.0
 COOLDOWN_MAX = 600.0
 # Ошибки, при которых повторять запрос бессмысленно: до сервера не дойти (сеть закрыта, прокси отказал, TLS не сошёлся).
 NO_CONNECTION = (httpx.ConnectError, httpx.ConnectTimeout, httpx.ProxyError, httpx.UnsupportedProtocol)
-NO_KEY = "Не найден ключ GigaChat: задайте GIGACHAT_CREDENTIALS (переменная окружения, .streamlit/secrets.toml или файл .env) или вставьте ключ в боковой панели приложения"
+NO_KEY = "Не найден ключ GigaChat: задайте GIGACHAT_CREDENTIALS (переменная окружения, .streamlit/secrets.toml или файл .env) или вставьте ключ в настройках приложения"
 
 # Freemium даёт один одновременный поток на ключ: все вызовы с одним ключом (из всех сессий) идут через общий замок.
 _GATES: dict[str, threading.Lock] = {}

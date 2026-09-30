@@ -30,7 +30,7 @@ SCENARIOS = [
 ]
 
 HOW_TO_KEY = ("создайте в папке проекта файл .env со строкой GIGACHAT_CREDENTIALS=<Authorization key> "
-              "(ключ: developers.sber.ru → проект GigaChat API → «Настройки API» → «Получить ключ») или вставьте ключ в боковой панели приложения")
+              "(ключ: developers.sber.ru → проект GigaChat API → «Настройки API» → «Получить ключ») или вставьте ключ в настройках приложения")
 
 
 def probe_host(url: str) -> tuple[bool, str]:
@@ -135,7 +135,7 @@ def main(argv: list[str] | None = None) -> int:
                         why = {402: "закончились токены этой модели", 404: "такой модели нет в API"}.get(e.status, "")
                         if e.status in (402, 404) and spare:  # приложение переживёт это само, но предупредить стоит
                             substituted = True
-                            add(f"Запрос: {role} ({model})", "warn", f"{why}: {e}", f"приложение само ответит моделью {spare}; выбрать явно — GIGACHAT_MODEL={spare} или меню в боковой панели")
+                            add(f"Запрос: {role} ({model})", "warn", f"{why}: {e}", f"приложение само ответит моделью {spare}; выбрать явно — GIGACHAT_MODEL={spare} или поле «Модель» в настройках приложения")
                         else:
                             failed += 1
                             add(f"Запрос: {role} ({model})", "fail", f"{why + ': ' if why else ''}{e}")

@@ -60,10 +60,7 @@ def opening(lesson: Lesson, address: str = "вы") -> str:
     q = lesson.concept(lesson.curriculum[0]).questions.get("open", "Расскажите своими словами, о чём был материал?")
     topic = lesson.title.split(":")[0]
     promise = lesson.promise or "К концу разговора вы сможете объяснить главное своими словами и применить это к новой ситуации."
-    text = (
-        f"Здравствуйте! Давайте закрепим материал про {topic}. Лекций не будет: я задаю вопросы, вы рассуждаете вслух. "
-        f"Ошибаться можно и даже полезно — так понимание становится прочнее. {promise}\n\n{q}"
-    )
+    text = f"Здравствуйте! Давайте закрепим материал про {topic}. Я задаю вопросы — вы рассуждаете вслух, ошибаться можно. {promise}\n\n{q}"
     return to_ty(text) if address == "ты" else text
 
 

@@ -27,12 +27,13 @@ REPLY = "Интересная мысль. А как бы вы объяснили
 
 
 class FakeGigaChat:
-    def __init__(self, token: str = "fake-token", fail_auth: bool = False, scope: str = "GIGACHAT_API_PERS", exhausted=(), missing=()):
+    def __init__(self, token: str = "fake-token", fail_auth: bool = False, scope: str = "GIGACHAT_API_PERS", exhausted=(), missing=(), delay: float = 0.0):
         self.token = token
         self.fail_auth = fail_auth
         self.scope = scope  # единственный scope, который подходит к «ключу»
         self.exhausted = set(exhausted)
         self.missing = set(missing)
+        self.delay = delay  # имитация задержки настоящего API (для ручной проверки анимаций)
         self.calls: list[dict] = []
         self.lesson = load_lesson("okr")
 
@@ -56,6 +57,8 @@ class FakeGigaChat:
         return 404, {"status": 404, "message": "not found"}
 
     def _chat(self, body: dict) -> tuple[int, dict]:
+        if self.delay:
+            time.sleep(self.delay)
         msgs = body.get("messages")
         if not isinstance(msgs, list) or not msgs or any(m.get("role") not in ROLES or not isinstance(m.get("content"), str) for m in msgs):
             return 400, {"status": 400, "message": "bad messages"}
@@ -120,6 +123,7 @@ if __name__ == "__main__":
     ap.add_argument("--exhausted", default="", help="модели через запятую, у которых «закончились токены» (402)")
     ap.add_argument("--missing", default="", help="модели через запятую, которых «нет» (404)")
     ap.add_argument("--fail-auth", action="store_true")
+    ap.add_argument("--delay", type=float, default=0.0, help="секунд на каждый chat/completions")
     a = ap.parse_args()
     split = lambda s: [x.strip() for x in s.split(",") if x.strip()]
-    serve(a.port, FakeGigaChat(scope=a.scope, exhausted=split(a.exhausted), missing=split(a.missing), fail_auth=a.fail_auth))
+    serve(a.port, FakeGigaChat(scope=a.scope, exhausted=split(a.exhausted), missing=split(a.missing), fail_auth=a.fail_auth, delay=a.delay))

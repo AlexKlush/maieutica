@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Майевтика</title>
+<link rel="preload" href="fonts/literata-cyrillic-opsz-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/onest-cyrillic-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css">
+<script>
+  // Тема до первой отрисовки, чтобы не мигало: сохранённый выбор или системная.
+  try {
+    var m = localStorage.getItem("mx-theme") || "auto";
+    var dark = m === "dark" || (m === "auto" && matchMedia("(prefers-color-scheme: dark)").matches);
+    document.documentElement.dataset.theme = dark ? "dark" : "light";
+  } catch (e) {}
+</script>
+</head>
+<body>
+<!-- Иконки: Lucide (ISC), см. LICENSES.md -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2m-7.07-17.07 1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 5v16"/><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M10 5H3M12 19H3M14 3v4M16 17v4M21 12h-9M21 19h-5M21 5h-7M8 10v4M8 12H3"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7M12 19V5"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-restart" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 15V3M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></symbol>
+</svg>
+
+<header class="top" id="top">
+  <div class="brand">Майевтика</div>
+  <nav class="rail" id="rail" aria-label="Этапы занятия"><ol></ol><span class="now-label" aria-live="polite"></span></nav>
+  <div class="tools">
+    <button class="ring" id="ringBtn" data-open="progress" aria-label="Прогресс ученика">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle class="trk" cx="12" cy="12" r="9"/><circle class="val" cx="12" cy="12" r="9" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/></svg>
+      <b>0%</b>
+    </button>
+    <button class="ibtn" data-open="material" aria-label="Материал урока" title="Материал урока"><svg class="i"><use href="#i-book"/></svg></button>
+    <button class="ibtn theme-btn" id="themeBtn" aria-label="Сменить тему" title="Тема">
+      <svg class="i sun"><use href="#i-sun"/></svg><svg class="i moon"><use href="#i-moon"/></svg>
+    </button>
+    <button class="ibtn" data-open="settings" aria-label="Настройки" title="Настройки"><svg class="i"><use href="#i-sliders"/></svg><span class="dot" id="connDot"></span></button>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" id="hero">
+    <h1 id="title"></h1>
+    <p id="subtitle">Сократический диалог</p>
+    <div class="offline" id="offline" hidden></div>
+  </section>
+  <div class="thread" id="thread" aria-live="polite"></div>
+  <div id="summary"></div>
+</main>
+
+<div class="dock" id="dock">
+  <button class="down" id="down" type="button" aria-label="К последнему сообщению"><svg class="i"><use href="#i-down"/></svg></button>
+  <form class="composer" id="composer" autocomplete="off">
+    <label class="sr" for="input">Ваш ответ</label>
+    <textarea id="input" rows="1" placeholder="Ваш ответ…" enterkeyhint="send"></textarea>
+    <button class="send" id="send" type="submit" aria-label="Отправить" disabled><svg class="i"><use href="#i-up"/></svg><span class="spin"></span></button>
+  </form>
+  <div class="hint">Enter — отправить · Shift + Enter — новая строка</div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="assertive"></div>
+<div class="scrim" id="scrim"></div>
+
+<aside class="panel" id="panel-progress" role="dialog" aria-modal="true" aria-labelledby="h-progress">
+  <header><h2 id="h-progress">Прогресс</h2><button class="ibtn" data-close aria-label="Закрыть"><svg class="i"><use href="#i-x"/></svg></button></header>
+  <div id="progress"></div>
+</aside>
+
+<aside class="panel" id="panel-material" role="dialog" aria-modal="true" aria-labelledby="h-material">
+  <header><h2 id="h-material">Материал</h2><button class="ibtn" data-close aria-label="Закрыть"><svg class="i"><use href="#i-x"/></svg></button></header>
+  <div id="material"></div>
+</aside>
+
+<aside class="panel" id="panel-settings" role="dialog" aria-modal="true" aria-labelledby="h-settings">
+  <header><h2 id="h-settings">Настройки</h2><button class="ibtn" data-close aria-label="Закрыть"><svg class="i"><use href="#i-x"/></svg></button></header>
+  <div id="settings"></div>
+</aside>
+
+<script src="app.js"></script>
+</body>
+</html>
