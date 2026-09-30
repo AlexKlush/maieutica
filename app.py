@@ -5,11 +5,13 @@ import json
 import os
 import time
 from pathlib import Path
+from urllib.parse import urlparse
 
 import streamlit as st
 
 from maieutica import GigaChat, LLMError, load_lesson
 from maieutica.engine import Tutor
+from maieutica.llm import FALLBACK_MODELS, SCOPES, find_credentials, normalize_key
 from maieutica.policy import PHASES
 
 ROOT = Path(__file__).resolve().parent
@@ -42,17 +44,23 @@ if os.environ.get("GIGACHAT_MODEL", "").strip():
     MODELS = {role: os.environ["GIGACHAT_MODEL"].strip() for role in MODELS}
 
 
+def app_client(key: str, scope: str = "", source: str = "") -> GigaChat:
+    # Для живого диалога: короткий таймаут, при недоступности — сразу автономный ответ, при 402/404 — запасная модель.
+    return GigaChat(key, scope or None, timeout=45.0, fail_fast=True, substitute_models=True, source=source)
+
+
 @st.cache_resource(show_spinner=False)
-def _gigachat() -> GigaChat:
-    return GigaChat(fail_fast=True)
+def _shared_client(key: str, scope: str, source: str) -> GigaChat:
+    return app_client(key, scope, source)
 
 
 def get_llm() -> GigaChat | None:
-    """None, если ключа нет: тьютор тогда работает в автономном режиме (правила без нейросети)."""
-    try:
-        return _gigachat()
-    except LLMError:
-        return None
+    """Ключ из боковой панели (только для этой вкладки) или из настроек (env, Secrets, .env). None — автономный режим."""
+    own = st.session_state.get("own_llm")
+    if own is not None:
+        return own
+    found = find_credentials()
+    return _shared_client(found.key, found.scope, found.source) if found else None
 
 
 @st.cache_data(show_spinner=False)
@@ -61,7 +69,7 @@ def get_lesson(name: str):
 
 
 def new_tutor(address: str) -> Tutor:
-    t = Tutor(get_lesson("okr"), get_llm(), MODELS, address=address)
+    t = Tutor(get_lesson("okr"), get_llm(), st.session_state.get("models", MODELS), address=address)
     t.start()
     return t
 
@@ -70,7 +78,70 @@ def ensure_session() -> Tutor:
     if "tutor" not in st.session_state:
         st.session_state.address = st.session_state.get("address", "вы")
         st.session_state.tutor = new_tutor(st.session_state.address)
-    return st.session_state.tutor
+    tutor = st.session_state.tutor
+    # Ключ могли добавить, поменять или убрать, пока приложение работает: тьютор всегда берёт текущий.
+    llm = get_llm()
+    if tutor.llm is not llm:
+        tutor.llm = llm
+        tutor.offline_reason = "" if llm else "ключ GigaChat не найден"
+    return tutor
+
+
+def connection_panel(tutor: Tutor) -> None:
+    llm = tutor.llm
+    flash = st.session_state.pop("flash", None)
+    if llm is None:
+        st.markdown('<div class="conn off"><b>Автономный режим</b><span>Ключ GigaChat не найден — тьютор отвечает по правилам, без нейросети. Добавьте ключ ниже.</span></div>', unsafe_allow_html=True)
+    else:
+        state, why = llm.status()
+        if state == "down":
+            st.markdown(f'<div class="conn off"><b>GigaChat недоступен</b><span>Пока отвечаю по правилам, без нейросети. Повторю попытку через {llm.retry_in()} с.<br>Причина: {esc(why)}</span></div>', unsafe_allow_html=True)
+        elif state == "unknown":
+            st.markdown(f'<div class="conn wait"><b>Ключ GigaChat найден</b><span>Источник: {esc(llm.source or "—")}. Связь проверится при первом ответе — или нажмите «Проверить подключение».</span></div>', unsafe_allow_html=True)
+        else:
+            subs = "".join(f"<br>{esc(m)}: {esc(why)} — отвечает замена" for m, why in llm.unavailable.items())
+            st.markdown(f'<div class="conn on"><b>GigaChat подключён</b><span>{esc(urlparse(llm.api_url).netloc)} · {esc(llm.scope)}{subs}</span></div>', unsafe_allow_html=True)
+    if flash:
+        (st.success if flash[0] == "ok" else st.error)(flash[1])
+    if llm is not None and st.button("Проверить подключение", use_container_width=True):
+        with st.spinner("Запрашиваю GigaChat…"):
+            ok, msg = llm.ping()
+        tutor.offline_reason = "" if ok else msg
+        st.session_state.flash = ("ok" if ok else "error", msg)
+        st.rerun()
+    own = st.session_state.get("own_llm") is not None
+    with st.expander("Ключ GigaChat" + (" · свой, для этой вкладки" if own else ""), expanded=llm is None):
+        st.caption("Authorization key из личного кабинета GigaChat API: developers.sber.ru → проект GigaChat API → «Настройки API» → «Получить ключ». "
+                   "Ключ хранится только в памяти этой вкладки и никуда не записывается. Постоянно — через файл .env (см. README).")
+        with st.form("gc_key", clear_on_submit=True, border=False):
+            key = st.text_input("Authorization key", type="password", placeholder="длинная строка base64")
+            scope = st.selectbox("Тип ключа (scope)", ["подобрать автоматически", *SCOPES], help="PERS — физлицо, B2B — предоплата юрлица/ИП, CORP — постоплата юрлица.")
+            submitted = st.form_submit_button("Подключить", use_container_width=True)
+        if submitted:
+            key = normalize_key(key)
+            if not key:
+                st.warning("Вставьте ключ.")
+            else:
+                client = app_client(key, "" if scope.startswith("подобрать") else scope, "боковая панель")
+                with st.spinner("Проверяю ключ…"):
+                    ok, msg = client.ping()
+                if ok:
+                    st.session_state.own_llm = client
+                    tutor.llm, tutor.offline_reason = client, ""
+                    st.session_state.flash = ("ok", msg)
+                    st.rerun()
+                st.error(msg)
+        if own and st.button("Забыть ключ", use_container_width=True):
+            del st.session_state["own_llm"]
+            st.rerun()
+    if llm is not None:
+        current = tutor.models["generator"]
+        options = list(dict.fromkeys([*FALLBACK_MODELS, current, *(m for m in llm.model_ids if m.startswith("GigaChat") and "Embed" not in m)]))
+        chosen = st.selectbox("Модель GigaChat", options, index=options.index(current), help="Для диагностики, реплик и проверки. Если у модели закончатся токены, ответит следующая по списку.")
+        if chosen != current:
+            st.session_state.models = {role: chosen for role in tutor.models}
+            tutor.models = dict(st.session_state.models)
+            st.rerun()
 
 
 def typewriter(text: str):
@@ -140,7 +211,8 @@ def trace_block(t, tutor: Tutor) -> None:
     if not t.analysis and t.move == "open":
         st.markdown(f'<div class="trace-chip"><span class="mv">{esc(t.move_label)}</span><span class="why">{esc(t.rationale)}</span></div>', unsafe_allow_html=True)
         return
-    stages = " · ".join(f"{s.label} {s.latency:.1f}с" for s in t.stages if s.latency)
+    stages = " · ".join(f"{s.label} {s.latency:.1f} с" + (f" ({s.model.split(':')[0]})" if s.model not in ("правила", "") else "") for s in t.stages if s.key != "plan")
+    swaps = sorted({s.note.split("замена: ", 1)[1] for s in t.stages if "замена: " in s.note})
     off = '<span class="tg off" title="Ответ собран по правилам, без нейросети">автономно</span>' if t.offline else ""
     st.markdown(
         f'<div class="trace-chip"><span class="mv">{esc(t.move_label)}</span>'
@@ -170,6 +242,8 @@ def trace_block(t, tutor: Tutor) -> None:
         else:
             st.markdown("**4 · Проверка** — " + ("пройдена (правила + LLM-аудитор)" if v.get("checked_by_llm") else "пройдена (правила)"))
         st.caption(stages)
+        if swaps:
+            st.caption("Замена модели: " + "; ".join(swaps) + " — ответила следующая по списку.")
 
 
 tutor = ensure_session()
@@ -177,22 +251,7 @@ tutor = ensure_session()
 with st.sidebar:
     st.markdown('<div class="brand"><span class="mark">Μ</span><span>Майевтика</span></div>', unsafe_allow_html=True)
     st.caption("Сократический диалог по тексту об OKR. Тьютор не читает лекцию: он спрашивает, а вы рассуждаете.")
-    if tutor.offline:
-        st.markdown(f'<div class="conn off"><b>Автономный режим</b><span>GigaChat не подключён — тьютор отвечает по правилам, без нейросети.<br>Причина: {esc(tutor.offline_reason)}</span></div>', unsafe_allow_html=True)
-    else:
-        st.markdown('<div class="conn on"><b>GigaChat подключён</b><span>Диагностика, реплики и проверка идут через нейросеть.</span></div>', unsafe_allow_html=True)
-    if st.button("Проверить подключение", use_container_width=True):
-        llm = get_llm()
-        if llm is None:
-            st.warning("Ключ GIGACHAT_CREDENTIALS не найден (переменная окружения, Secrets или .env).")
-        else:
-            with st.spinner("Запрашиваю GigaChat…"):
-                ok, msg = llm.ping()
-            if ok:
-                tutor.llm, tutor.offline_reason = llm, ""
-                st.success(msg)
-            else:
-                st.error(msg)
+    connection_panel(tutor)
     with st.expander("Материал урока", expanded=False):
         st.markdown(tutor.lesson.source_text.replace("\n", "  \n"))
     st.markdown("##### Проверьте тьютора")
@@ -216,7 +275,8 @@ with st.sidebar:
         st.session_state.tutor = new_tutor(st.session_state.address)
         st.rerun()
     st.download_button("Скачать лог сессии (JSON)", json.dumps(tutor.export(), ensure_ascii=False, indent=1), file_name=f"maieutica-{tutor.session_id[:8]}.json", mime="application/json", use_container_width=True)
-    st.caption("Модели: правила без нейросети (автономный режим)." if tutor.offline else f"Модели: диагностика {MODELS['analyzer']}, генерация {MODELS['generator']}, проверка {MODELS['verifier']}.")
+    m = tutor.models
+    st.caption("Модели: правила без нейросети (автономный режим)." if tutor.offline else f"Модели: диагностика {m['analyzer']}, генерация {m['generator']}, проверка {m['verifier']}.")
 
 st.markdown(
     f'<header class="app-head"><div><h1>{esc(tutor.lesson.title)}</h1>'

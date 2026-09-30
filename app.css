@@ -166,4 +166,6 @@ header[data-testid="stHeader"] { background: transparent; }
 .conn.on b { color: #9bbf7a; }
 .conn.off { border-color: var(--miltos); background: rgba(178, 58, 36, .1); }
 .conn.off b { color: var(--clay-hi); }
+.conn.wait { border-color: var(--dilute); }
+.conn.wait b { color: var(--slip); }
 .trace-chip .tg.off { border-color: var(--miltos); color: var(--clay-hi); }
