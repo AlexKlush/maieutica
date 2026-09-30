@@ -159,3 +159,11 @@ header[data-testid="stHeader"] { background: transparent; }
 @media (prefers-reduced-motion: reduce) {
   [data-testid="stChatMessage"] { animation: none; }
 }
+
+.conn { margin: .6rem 0 .5rem; padding: .55rem .75rem; border: 1px solid var(--line); border-radius: 10px; font-size: .82rem; line-height: 1.4; }
+.conn b { display: block; font-family: 'Golos Text', system-ui, sans-serif; font-weight: 600; letter-spacing: .01em; }
+.conn span { color: var(--slip-dim); }
+.conn.on b { color: #9bbf7a; }
+.conn.off { border-color: var(--miltos); background: rgba(178, 58, 36, .1); }
+.conn.off b { color: var(--clay-hi); }
+.trace-chip .tg.off { border-color: var(--miltos); color: var(--clay-hi); }

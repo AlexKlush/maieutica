@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import html
 import json
+import os
 import time
 from pathlib import Path
 
@@ -37,11 +38,21 @@ try:
     MODELS.update({k: str(v) for k, v in dict(st.secrets.get("models", {})).items()})
 except Exception:
     pass
+if os.environ.get("GIGACHAT_MODEL", "").strip():
+    MODELS = {role: os.environ["GIGACHAT_MODEL"].strip() for role in MODELS}
 
 
 @st.cache_resource(show_spinner=False)
-def get_llm() -> GigaChat:
-    return GigaChat()
+def _gigachat() -> GigaChat:
+    return GigaChat(fail_fast=True)
+
+
+def get_llm() -> GigaChat | None:
+    """None, если ключа нет: тьютор тогда работает в автономном режиме (правила без нейросети)."""
+    try:
+        return _gigachat()
+    except LLMError:
+        return None
 
 
 @st.cache_data(show_spinner=False)
@@ -130,14 +141,17 @@ def trace_block(t, tutor: Tutor) -> None:
         st.markdown(f'<div class="trace-chip"><span class="mv">{esc(t.move_label)}</span><span class="why">{esc(t.rationale)}</span></div>', unsafe_allow_html=True)
         return
     stages = " · ".join(f"{s.label} {s.latency:.1f}с" for s in t.stages if s.latency)
+    off = '<span class="tg off" title="Ответ собран по правилам, без нейросети">автономно</span>' if t.offline else ""
     st.markdown(
         f'<div class="trace-chip"><span class="mv">{esc(t.move_label)}</span>'
-        f'<span class="tg">{esc(tutor.lesson.concept(t.target).short)}</span>'
+        f'<span class="tg">{esc(tutor.lesson.concept(t.target).short)}</span>{off}'
         f'<span class="lat">{t.total_latency:.1f} с</span></div>',
         unsafe_allow_html=True,
     )
     with st.expander("Как тьютор принял решение", expanded=False):
         a = t.analysis
+        if t.offline:
+            st.markdown(f"**Автономный режим** — GigaChat не участвовал: {t.note}")
         if a:
             mis = ", ".join(f"{m['id']} («{m.get('quote', '')}»)" for m in a["misconceptions"]) or "—"
             st.markdown(
@@ -158,16 +172,27 @@ def trace_block(t, tutor: Tutor) -> None:
         st.caption(stages)
 
 
-try:
-    tutor = ensure_session()
-except LLMError as e:
-    st.markdown('<header class="app-head"><div><h1>Майевтика</h1><div class="sub">Сократический тьютор на GigaChat</div></div></header>', unsafe_allow_html=True)
-    st.error(f"Тьютор не может подключиться к GigaChat: {e}. Если вы владелец приложения — добавьте GIGACHAT_CREDENTIALS в Settings → Secrets.")
-    st.stop()
+tutor = ensure_session()
 
 with st.sidebar:
     st.markdown('<div class="brand"><span class="mark">Μ</span><span>Майевтика</span></div>', unsafe_allow_html=True)
     st.caption("Сократический диалог по тексту об OKR. Тьютор не читает лекцию: он спрашивает, а вы рассуждаете.")
+    if tutor.offline:
+        st.markdown(f'<div class="conn off"><b>Автономный режим</b><span>GigaChat не подключён — тьютор отвечает по правилам, без нейросети.<br>Причина: {esc(tutor.offline_reason)}</span></div>', unsafe_allow_html=True)
+    else:
+        st.markdown('<div class="conn on"><b>GigaChat подключён</b><span>Диагностика, реплики и проверка идут через нейросеть.</span></div>', unsafe_allow_html=True)
+    if st.button("Проверить подключение", use_container_width=True):
+        llm = get_llm()
+        if llm is None:
+            st.warning("Ключ GIGACHAT_CREDENTIALS не найден (переменная окружения, Secrets или .env).")
+        else:
+            with st.spinner("Запрашиваю GigaChat…"):
+                ok, msg = llm.ping()
+            if ok:
+                tutor.llm, tutor.offline_reason = llm, ""
+                st.success(msg)
+            else:
+                st.error(msg)
     with st.expander("Материал урока", expanded=False):
         st.markdown(tutor.lesson.source_text.replace("\n", "  \n"))
     st.markdown("##### Проверьте тьютора")
@@ -182,7 +207,7 @@ with st.sidebar:
     if c2.button("К рефлексии", use_container_width=True, disabled=tutor.state.phase in ("reflect", "done")):
         st.session_state.jump = "reflect"
     show_trace = st.toggle("Показывать ход мысли тьютора", value=True)
-    addr = st.radio("Обращение", ["вы", "ты"], horizontal=True, index=0 if st.session_state.address == "вы" else 1)
+    addr = st.radio("Обращение", ["вы", "ты"], horizontal=True, index=0 if st.session_state.address == "вы" else 1, disabled=tutor.offline, help="В автономном режиме доступно только «вы».")
     if addr != st.session_state.address:
         st.session_state.address = addr
         st.session_state.tutor = new_tutor(addr)
@@ -191,11 +216,11 @@ with st.sidebar:
         st.session_state.tutor = new_tutor(st.session_state.address)
         st.rerun()
     st.download_button("Скачать лог сессии (JSON)", json.dumps(tutor.export(), ensure_ascii=False, indent=1), file_name=f"maieutica-{tutor.session_id[:8]}.json", mime="application/json", use_container_width=True)
-    st.caption(f"Модели: диагностика {MODELS['analyzer']}, генерация {MODELS['generator']}, проверка {MODELS['verifier']}.")
+    st.caption("Модели: правила без нейросети (автономный режим)." if tutor.offline else f"Модели: диагностика {MODELS['analyzer']}, генерация {MODELS['generator']}, проверка {MODELS['verifier']}.")
 
 st.markdown(
     f'<header class="app-head"><div><h1>{esc(tutor.lesson.title)}</h1>'
-    f'<div class="sub">Сократический диалог на GigaChat: тьютор спрашивает, вы рассуждаете</div></div>{phase_rail(tutor)}</header>',
+    f'<div class="sub">Сократический диалог {"в автономном режиме" if tutor.offline else "на GigaChat"}: тьютор спрашивает, вы рассуждаете</div></div>{phase_rail(tutor)}</header>',
     unsafe_allow_html=True,
 )
 
