@@ -85,9 +85,9 @@ class Tutor:
         self.traces: list[TurnTrace] = []
         self.finished = False
 
-    def start(self) -> TurnTrace:
+    def start(self, generated: bool = False) -> TurnTrace:
         plan = self.policy.open_plan(self.lm)
-        text = generator.opening(self.lesson, self.address)
+        text = generator.opening(self.lesson, self.address, generated)
         self.history.append({"role": "assistant", "content": text})
         self.state.last_question = last_question(text)
         tr = self._trace("", text, plan, None, [], {"ok": True, "skipped": "шаблонная реплика"}, 0.0)
@@ -280,9 +280,11 @@ class Tutor:
         st = self.state
         if st.phase == "apply" and st.apply_step == 0:
             case = next((c for c in self.lesson.cases if c.id == st.case_id), None)
-            if case:
-                return ("КРИТЕРИИ ПРОВЕРКИ РЕШЕНИЯ КЕЙСА\nХорошо: " + "; ".join(case.good_signals) + "\nОшибки: " + "; ".join(case.bad_signals)
-                        + "\nПроверь КАЖДЫЙ ключевой результат: это измеримый результат или действие/задача («провести», «запустить», «сделать»)? Действие в роли KR — это заблуждение kr_are_tasks.")
+            lines = [f"Хорошо: {'; '.join(case.good_signals)}" if case and case.good_signals else "",
+                     f"Ошибки: {'; '.join(case.bad_signals)}" if case and case.bad_signals else "", self.lesson.case_check]
+            lines = [x for x in lines if x]
+            if lines:
+                return "КРИТЕРИИ ПРОВЕРКИ РЕШЕНИЯ КЕЙСА\n" + "\n".join(lines)
         if st.phase == "apply" and st.apply_step == 1:
             ex = next((e for e in self.lesson.flawed_examples if e.id == st.flawed_id), None)
             if ex:

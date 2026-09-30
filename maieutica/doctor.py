@@ -66,7 +66,7 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"      → {fix}", flush=True)
 
     if not args.json:
-        print(f"Майевтика — диагностика подключения (Python {sys.version.split()[0]})")
+        print(f"Росток — диагностика подключения (Python {sys.version.split()[0]})")
 
     lesson = load_lesson("okr")
     add("Урок", "ok", f"{lesson.title}: понятий {len(lesson.concepts)}, заблуждений {len(lesson.misconceptions)}")

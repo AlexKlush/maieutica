@@ -1,10 +1,10 @@
 /* Страница Streamlit: весь интерфейс — компонент ui/ на весь экран, остальное прячем. */
-html, body, .stApp, [data-testid="stAppViewContainer"] { overflow: hidden !important; background: #F7F6F1; }
-@media (prefers-color-scheme: dark) { html, body, .stApp, [data-testid="stAppViewContainer"] { background: #0E1210; } }
+html, body, .stApp, [data-testid="stAppViewContainer"] { overflow: hidden !important; background: #FAF9F5; }
+@media (prefers-color-scheme: dark) { html, body, .stApp, [data-testid="stAppViewContainer"] { background: #262624; } }
 header[data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stDecoration"], [data-testid="stStatusWidget"],
 [data-testid="stSidebar"], [data-testid="stSidebarCollapsedControl"], [data-testid="collapsedControl"], footer { display: none !important; }
 .block-container, [data-testid="stMainBlockContainer"] { padding: 0 !important; max-width: none !important; }
-iframe[title$="maieutica_ui"] {
+iframe[title$="rostok_ui"] {
   position: fixed !important; inset: 0 !important; z-index: 999;
   width: 100vw !important; height: 100vh !important; height: 100dvh !important; border: 0 !important;
 }

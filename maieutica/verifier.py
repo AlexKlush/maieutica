@@ -47,7 +47,7 @@ class Verdict:
 def clean(text: str) -> str:
     text = EMOJI.sub("", text)
     text = re.sub(r"\*\*(.+?)\*\*", r"\1", text)
-    text = re.sub(r"^(Тьютор|Наставник|Майевтика)\s*:\s*", "", text.strip())
+    text = re.sub(r"^(Тьютор|Наставник|Майевтика|Росток)\s*:\s*", "", text.strip())
     return re.sub(r"[ \t]+\n", "\n", text).strip()
 
 

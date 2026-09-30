@@ -318,8 +318,12 @@ class GigaChat:
 
     # --- запросы ---
 
-    def _request(self, method: str, path: str, *, json_body: dict | None = None, session_id: str | None = None) -> dict:
+    def _request(self, method: str, path: str, *, json_body: dict | None = None, session_id: str | None = None, timeout: float | None = None) -> dict:
+        # timeout — для долгих разовых запросов (карта урока): свой предел ожидания, без повтора и без паузы для всего клиента.
+        per_call = httpx.Timeout(timeout, connect=10.0) if timeout else httpx.USE_CLIENT_DEFAULT
         delay = 1.5
+        slept = 0.0
+        budget = 12.0 if self.fail_fast else 90.0  # приложение не заставляет человека ждать минуту повторов
         last = ""
         timeouts = unauthorized = 0
         tried = {self.api_url}
@@ -328,7 +332,7 @@ class GigaChat:
                 headers = {"Authorization": f"Bearer {self._auth(force=last == '401')}", "Accept": "application/json"}
                 if session_id:
                     headers["X-Session-ID"] = session_id
-                r = self.http.request(method, self.api_url + path, headers=headers, json=json_body)
+                r = self.http.request(method, self.api_url + path, headers=headers, json=json_body, timeout=per_call)
             except LLMError:
                 raise
             except NO_CONNECTION as e:
@@ -340,6 +344,8 @@ class GigaChat:
                     continue
                 raise self._down(f"нет соединения с GigaChat ({', '.join(sorted(_host(u) for u in tried))}: {_why(e)})") from e
             except httpx.TimeoutException as e:
+                if timeout:
+                    raise LLMError(f"GigaChat не успел ответить за {timeout:.0f} с") from e
                 timeouts += 1
                 if timeouts >= 2:
                     raise self._down(f"GigaChat не ответил вовремя ({_why(e)})") from e
@@ -347,7 +353,10 @@ class GigaChat:
                 continue
             except httpx.HTTPError as e:
                 last = type(e).__name__
+                if slept + delay > budget:
+                    raise self._down(f"GigaChat не отвечает ({_why(e)})") from e
                 time.sleep(delay)
+                slept += delay
                 delay = min(delay * 2, 20)
                 continue
             if r.status_code == 200:
@@ -365,7 +374,10 @@ class GigaChat:
                     raise self._down(f"GigaChat 401: токен не принят API ({_body(r)})")
                 continue
             if r.status_code == 429 or r.status_code >= 500:
+                if slept + delay > budget:
+                    break
                 time.sleep(delay)
+                slept += delay
                 delay = min(delay * 2, 20)
                 continue
             raise APIError(r.status_code, f"GigaChat {r.status_code}: {_body(r)}")
@@ -412,6 +424,7 @@ class GigaChat:
         function: dict | None = None,
         session_id: str | None = None,
         repetition_penalty: float | None = None,
+        timeout: float | None = None,
     ) -> LLMResult:
         body: dict[str, Any] = {"model": model, "messages": messages, "max_tokens": max_tokens, "temperature": temperature}
         if top_p is not None:
@@ -430,7 +443,7 @@ class GigaChat:
             while True:
                 body["model"] = self.resolve(model) if self.substitute_models else model
                 try:
-                    data = self._request("POST", "/chat/completions", json_body=body, session_id=session_id)
+                    data = self._request("POST", "/chat/completions", json_body=body, session_id=session_id, timeout=timeout)
                     break
                 except APIError as e:
                     if not self.substitute_models or e.status not in (402, 403, 404):

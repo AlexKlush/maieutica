@@ -53,6 +53,7 @@ class Lesson(BaseModel):
     promise: str = ""
     application_task: str = "Примените материал к этой ситуации: как бы вы действовали и почему?"
     critique_task: str = "Посмотрите на этот пример: что в нём не так с точки зрения материала?"
+    case_check: str = ""  # что особо проверить в решении кейса (подсказка диагностике), например «KR — это метрики, а не задачи»
     concepts: list[Concept]
     misconceptions: list[Misconception] = Field(default_factory=list)
     cases: list[Case] = Field(default_factory=list)

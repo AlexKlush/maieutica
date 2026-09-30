@@ -3,91 +3,191 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Майевтика</title>
+<title>Росток</title>
 <link rel="preload" href="fonts/literata-cyrillic-opsz-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/onest-cyrillic-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="style.css">
 <script>
-  // Тема до первой отрисовки, чтобы не мигало: сохранённый выбор или системная.
+  // Тема и свёрнутая панель — до первой отрисовки, чтобы ничего не мигало.
   try {
-    var m = localStorage.getItem("mx-theme") || "auto";
+    var m = localStorage.getItem("rs-theme") || "auto";
     var dark = m === "dark" || (m === "auto" && matchMedia("(prefers-color-scheme: dark)").matches);
     document.documentElement.dataset.theme = dark ? "dark" : "light";
+    document.documentElement.dataset.side = localStorage.getItem("rs-side") || "open";
   } catch (e) {}
 </script>
 </head>
 <body>
-<!-- Иконки: Lucide (ISC), см. LICENSES.md -->
+<!-- Иконки: Lucide (ISC), см. LICENSES.md. Логотип «Росток» — свой. -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2m-7.07-17.07 1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol>
-  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></symbol>
-  <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 5v16"/><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"/></symbol>
-  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M10 5H3M12 19H3M14 3v4M16 17v4M21 12h-9M21 19h-5M21 5h-7M8 10v4M8 12H3"/></symbol>
-  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
-  <symbol id="i-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7M12 19V5"/></symbol>
-  <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
-  <symbol id="i-restart" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></symbol>
-  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 15V3M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5"/></symbol>
-  <symbol id="i-key" viewBox="0 0 24 24"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></symbol>
-  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
-  <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></symbol>
-  <symbol id="i-right" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></symbol>
+  <symbol id="i-panel" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" /> <path d="M9 3v18" /></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14" /> <path d="M12 5v14" /></symbol>
+  <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" /> <path d="M20 2v4" /> <path d="M22 4h-4" /> <circle cx="4" cy="20" r="2" /></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z" /></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 5v16" /> <path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z" /></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M5 21v-6" /> <path d="M12 21V3" /> <path d="M19 21V9" /></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><path d="M14 17H5" /> <path d="M19 7h-9" /> <circle cx="17" cy="17" r="3" /> <circle cx="7" cy="7" r="3" /></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /> <path d="M12 2v2" /> <path d="M12 20v2" /> <path d="m4.93 4.93 1.41 1.41" /> <path d="m17.66 17.66 1.41 1.41" /> <path d="M2 12h2" /> <path d="M20 12h2" /> <path d="m6.34 17.66-1.41 1.41" /> <path d="m19.07 4.93-1.41 1.41" /></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" /></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7" /> <path d="M12 19V5" /></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14" /> <path d="m19 12-7 7-7-7" /></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></symbol>
+  <symbol id="i-chev-r" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" /></symbol>
+  <symbol id="i-clip" viewBox="0 0 24 24"><path d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551" /></symbol>
+  <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" /> <path d="M9 18h6" /> <path d="M10 22h4" /></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" /> <path d="M14 2v5a1 1 0 0 0 1 1h5" /> <path d="M10 9H8" /> <path d="M16 13H8" /> <path d="M16 17H8" /></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <line x1="12" x2="12" y1="8" y2="12" /> <line x1="12" x2="12.01" y1="16" y2="16" /></symbol>
+  <symbol id="i-restart" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /> <path d="M3 3v5h5" /></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 15V3" /> <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /> <path d="m7 10 5 5 5-5" /></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z" /> <circle cx="16.5" cy="7.5" r=".5" fill="currentColor" /></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M10 11v6" /> <path d="M14 11v6" /> <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /> <path d="M3 6h18" /> <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /> <path d="M12 17h.01" /></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 5h16" /> <path d="M4 12h16" /> <path d="M4 19h16" /></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M5 12h14" /> <path d="m12 5 7 7-7 7" /></symbol>
+  <symbol id="i-steps" viewBox="0 0 24 24"><path d="M13 5h8" /> <path d="M13 12h8" /> <path d="M13 19h8" /> <path d="m3 17 2 2 4-4" /> <path d="m3 7 2 2 4-4" /></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1" /> <circle cx="19" cy="12" r="1" /> <circle cx="5" cy="12" r="1" /></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2" /> <path d="M6.453 15h11.094" /> <path d="M8.5 2h7" /></symbol>
 </svg>
 
-<header class="top" id="top">
-  <div class="brand">Майевтика</div>
-  <nav class="rail" id="rail" aria-label="Этапы занятия"><ol></ol><span class="now-label" aria-live="polite"></span></nav>
-  <div class="tools">
-    <button class="ring" id="ringBtn" data-open="progress" aria-label="Прогресс ученика">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><circle class="trk" cx="12" cy="12" r="9"/><circle class="val" cx="12" cy="12" r="9" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/></svg>
-      <b>0%</b>
-    </button>
-    <button class="ibtn" data-open="material" aria-label="Материал урока" title="Материал урока"><svg class="i"><use href="#i-book"/></svg></button>
-    <button class="ibtn theme-btn" id="themeBtn" aria-label="Сменить тему" title="Тема">
-      <svg class="i sun"><use href="#i-sun"/></svg><svg class="i moon"><use href="#i-moon"/></svg>
-    </button>
-    <button class="ibtn" data-open="settings" aria-label="Настройки" title="Настройки"><svg class="i"><use href="#i-sliders"/></svg><span class="dot" id="connDot"></span></button>
+<div class="app" id="app" data-view="home">
+  <!-- ── боковая панель: разборы ─────────────────────────────── -->
+  <aside class="side" id="side" aria-label="Разборы">
+    <div class="side-top">
+      <button class="ib" id="sideToggle" type="button" aria-label="Свернуть панель" title="Свернуть панель"><svg class="i"><use href="#i-panel"/></svg></button>
+      <button class="brand" type="button" data-home aria-label="На главную">
+        <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><path class="lg-stem" d="M14.8 15.2h2.4v13.6a1.2 1.2 0 0 1-2.4 0Z"/><path class="lg-leaf lg-l" d="M15.6 18.6C9.2 19.1 4.6 15.2 3.6 8.4c6.6-.2 11.6 3.5 12 10.2Z"/><path class="lg-leaf lg-r" d="M16.4 15.4C16 8.2 20.6 3.7 28.4 3.2c.3 7.9-4.2 12.3-12 12.2Z"/></svg><span class="word">Росток</span>
+      </button>
+    </div>
+    <nav class="side-nav">
+      <button class="nav new" type="button" data-home title="Новый разбор"><span class="plus"><svg class="i"><use href="#i-plus"/></svg></span><span class="label">Новый разбор</span></button>
+      <button class="nav" type="button" data-expand="examples" title="Примеры"><svg class="i"><use href="#i-sparkles"/></svg><span class="label">Примеры</span></button>
+      <button class="nav" type="button" data-expand="chats" title="Разборы"><svg class="i"><use href="#i-chat"/></svg><span class="label">Разборы</span><span class="count" id="chatCount"></span></button>
+    </nav>
+    <div class="side-scroll" id="sideScroll">
+      <section class="group" id="g-examples">
+        <h3>Примеры</h3>
+        <ul class="list" id="examples"></ul>
+      </section>
+      <section class="group" id="g-chats">
+        <h3>Недавние</h3>
+        <ul class="list" id="chats"></ul>
+        <p class="empty" id="chatsEmpty">Здесь появятся ваши разборы.</p>
+      </section>
+    </div>
+    <div class="side-foot">
+      <button class="conn" type="button" data-settings title="Подключение"><span class="dot" id="connDot"></span><span class="label" id="connLabel">GigaChat</span></button>
+      <button class="ib theme-btn" id="themeBtn" type="button" aria-label="Сменить тему" title="Тема">
+        <svg class="i sun"><use href="#i-sun"/></svg><svg class="i moon"><use href="#i-moon"/></svg>
+      </button>
+      <button class="ib" type="button" data-settings aria-label="Настройки" title="Настройки"><svg class="i"><use href="#i-settings"/></svg></button>
+    </div>
+  </aside>
+  <div class="side-scrim" id="sideScrim"></div>
+
+  <!-- ── основная колонка ─────────────────────────────────────── -->
+  <main class="main" id="main">
+    <header class="bar" id="bar">
+      <button class="ib only-narrow" type="button" id="sideOpen" aria-label="Разборы"><svg class="i"><use href="#i-menu"/></svg></button>
+      <div class="bar-title">
+        <button class="title" id="chatTitle" type="button" data-panel="material" title="Материал разбора"></button>
+        <span class="phase-now" id="phaseNow" aria-live="polite"></span>
+      </div>
+      <ol class="steps" id="steps" aria-label="Этапы разбора"></ol>
+      <div class="bar-tools">
+        <button class="tool" type="button" data-panel="material" title="Материал"><svg class="i"><use href="#i-book"/></svg><span>Материал</span></button>
+        <button class="tool meter" type="button" data-panel="progress" id="meterBtn" title="Прогресс">
+          <svg class="ring" viewBox="0 0 20 20" aria-hidden="true"><circle class="trk" cx="10" cy="10" r="8"/><circle class="val" cx="10" cy="10" r="8" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/></svg>
+          <b id="meterPct">0%</b>
+        </button>
+      </div>
+    </header>
+
+    <div class="scroller" id="scroller">
+      <section class="home" id="home">
+        <div class="hello" id="hello">
+          <svg class="logo big" viewBox="0 0 32 32" aria-hidden="true"><path class="lg-stem" d="M14.8 15.2h2.4v13.6a1.2 1.2 0 0 1-2.4 0Z"/><path class="lg-leaf lg-l" d="M15.6 18.6C9.2 19.1 4.6 15.2 3.6 8.4c6.6-.2 11.6 3.5 12 10.2Z"/><path class="lg-leaf lg-r" d="M16.4 15.4C16 8.2 20.6 3.7 28.4 3.2c.3 7.9-4.2 12.3-12 12.2Z"/></svg>
+          <h1><span class="greet" id="greet">Добрый день</span><span class="ask" id="ask">Над чем сегодня поработаем?</span></h1>
+        </div>
+        <div class="home-slot" id="homeSlot"></div>
+        <div class="starters" id="starters">
+          <button type="button" class="chip" data-starter="text"><svg class="i"><use href="#i-doc"/></svg>Разобрать свой текст</button>
+          <button type="button" class="chip" data-starter="topic"><svg class="i"><use href="#i-bulb"/></svg>Изучить тему</button>
+          <button type="button" class="chip" data-starter="file"><svg class="i"><use href="#i-clip"/></svg>Загрузить файл</button>
+          <button type="button" class="chip" data-starter="how"><svg class="i"><use href="#i-help"/></svg>Как это работает</button>
+        </div>
+        <div class="how" id="how" hidden>
+          <ol>
+            <li><b>Дайте материал.</b> Вставьте конспект, статью, главу — или просто назовите тему.</li>
+            <li><b>Рассуждайте.</b> Росток не читает лекцию: он задаёт вопросы, а ответ вы находите сами. Застряли — будут подсказки.</li>
+            <li><b>Смотрите, что уже понятно.</b> Справа — план разбора и прогресс по каждой мысли материала.</li>
+          </ol>
+        </div>
+        <div class="samples" id="samples">
+          <p class="kicker">Или начните с примера</p>
+          <div class="sample-grid" id="sampleGrid"></div>
+        </div>
+      </section>
+      <div class="thread" id="thread" aria-live="polite"></div>
+      <div id="summary"></div>
+    </div>
+
+    <div class="dock" id="dock">
+      <button class="down" id="down" type="button" aria-label="К последнему сообщению"><svg class="i"><use href="#i-down"/></svg></button>
+      <form class="composer" id="composer" autocomplete="off">
+        <label class="sr" for="input">Сообщение</label>
+        <div class="field">
+          <textarea id="input" rows="1" enterkeyhint="send" spellcheck="true"></textarea>
+          <div class="ph" id="ph" aria-hidden="true"></div>
+        </div>
+        <div class="row">
+          <div class="left">
+            <button type="button" class="cb" id="plusBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Ещё" title="Ещё"><svg class="i"><use href="#i-plus"/></svg></button>
+            <span class="count-chars" id="chars"></span>
+          </div>
+          <div class="right">
+            <button type="button" class="model" id="modelBtn" aria-haspopup="menu" aria-expanded="false"><span id="modelName">GigaChat</span><svg class="i"><use href="#i-chev"/></svg></button>
+            <button class="send" id="send" type="submit" aria-label="Отправить" disabled><svg class="i"><use href="#i-up"/></svg><span class="spin"></span></button>
+          </div>
+        </div>
+        <div class="menu" id="plusMenu" role="menu" hidden></div>
+        <div class="menu right" id="modelMenu" role="menu" hidden></div>
+        <div class="drop" id="drop" aria-hidden="true"><svg class="i"><use href="#i-doc"/></svg>Отпустите файл — возьму текст из него</div>
+      </form>
+      <p class="fine" id="fine">Росток задаёт вопросы, а не выдаёт готовые ответы. Ошибаться можно.</p>
+      <p class="reject" id="reject" role="alert" hidden></p>
+    </div>
+  </main>
+
+  <!-- ── правая панель: материал и прогресс ───────────────────── -->
+  <div class="edge" id="edge" aria-hidden="true">
+    <button type="button" data-panel="material" title="Материал" tabindex="-1"><svg class="i"><use href="#i-book"/></svg></button>
+    <button type="button" data-panel="progress" title="Прогресс" tabindex="-1"><svg class="i"><use href="#i-chart"/></svg></button>
+    <span class="edge-map" id="edgeMap" title="План разбора"></span>
   </div>
-</header>
-
-<main id="main">
-  <section class="hero" id="hero">
-    <h1 id="title"></h1>
-    <p id="subtitle">Сократический диалог</p>
-    <div class="offline" id="offline" hidden></div>
-  </section>
-  <div class="thread" id="thread" aria-live="polite"></div>
-  <div id="summary"></div>
-</main>
-
-<div class="dock" id="dock">
-  <button class="down" id="down" type="button" aria-label="К последнему сообщению"><svg class="i"><use href="#i-down"/></svg></button>
-  <form class="composer" id="composer" autocomplete="off">
-    <label class="sr" for="input">Ваш ответ</label>
-    <textarea id="input" rows="1" placeholder="Ваш ответ…" enterkeyhint="send"></textarea>
-    <button class="send" id="send" type="submit" aria-label="Отправить" disabled><svg class="i"><use href="#i-up"/></svg><span class="spin"></span></button>
-  </form>
-  <div class="hint">Enter — отправить · Shift + Enter — новая строка</div>
+  <aside class="panel" id="panel" aria-label="Материал и прогресс">
+    <header>
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" data-tab="material" aria-selected="true">Материал</button>
+        <button type="button" role="tab" data-tab="progress" aria-selected="false">Прогресс</button>
+        <span class="tab-ink" id="tabInk"></span>
+      </div>
+      <button class="ib" type="button" id="panelClose" aria-label="Закрыть панель"><svg class="i"><use href="#i-x"/></svg></button>
+    </header>
+    <div class="panel-body" id="panelBody"></div>
+  </aside>
 </div>
 
+<div class="modal" id="settings" role="dialog" aria-modal="true" aria-labelledby="h-settings" hidden>
+  <div class="modal-card">
+    <header><h2 id="h-settings">Настройки</h2><button class="ib" type="button" data-close aria-label="Закрыть"><svg class="i"><use href="#i-x"/></svg></button></header>
+    <div class="modal-body" id="settingsBody"></div>
+  </div>
+</div>
 <div class="toasts" id="toasts" aria-live="assertive"></div>
-<div class="scrim" id="scrim"></div>
-
-<aside class="panel" id="panel-progress" role="dialog" aria-modal="true" aria-labelledby="h-progress">
-  <header><h2 id="h-progress">Прогресс</h2><button class="ibtn" data-close aria-label="Закрыть"><svg class="i"><use href="#i-x"/></svg></button></header>
-  <div id="progress"></div>
-</aside>
-
-<aside class="panel" id="panel-material" role="dialog" aria-modal="true" aria-labelledby="h-material">
-  <header><h2 id="h-material">Материал</h2><button class="ibtn" data-close aria-label="Закрыть"><svg class="i"><use href="#i-x"/></svg></button></header>
-  <div id="material"></div>
-</aside>
-
-<aside class="panel" id="panel-settings" role="dialog" aria-modal="true" aria-labelledby="h-settings">
-  <header><h2 id="h-settings">Настройки</h2><button class="ibtn" data-close aria-label="Закрыть"><svg class="i"><use href="#i-x"/></svg></button></header>
-  <div id="settings"></div>
-</aside>
-
+<input type="file" id="file" accept=".txt,.md,.markdown,text/plain,text/markdown" hidden>
 <script src="app.js"></script>
 </body>
 </html>

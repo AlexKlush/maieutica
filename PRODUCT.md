@@ -16,7 +16,7 @@ Primary: ML/LLM specialists at a Russian company reviewing internship test assig
 
 ## Product Purpose
 
-«Майевтика» is a Socratic-dialogue pipeline: after a learner reads a short text (the assignment's OKR text), the system runs a structured Socratic dialogue that helps the learner practise and master the material: empathic, pushes the learner to think, goal-oriented, grounded in recent research. Success: reviewers see a systematic, research-backed dialogue (not chit-chat), can try it themselves, and understand why each design choice was made.
+«Росток» (formerly «Майевтика») is a Socratic-dialogue tutor for any material: the learner pastes a text (or names a topic and GigaChat writes a short study note), and the system runs a structured Socratic dialogue that helps the learner practise and master the material: empathic, pushes the learner to think, goal-oriented, grounded in recent research. Success: reviewers see a systematic, research-backed dialogue (not chit-chat), can try it themselves, and understand why each design choice was made.
 
 ## Positioning
 
@@ -35,7 +35,7 @@ The test assignment (ТЗ) requires: research in verified sources (arXiv), with 
 
 ## Brand Commitments
 
-Name: «Майевтика» (maieutics, Socrates' "midwifery" of ideas). Author credit: Алексей Клушин, GitHub AlexKlush. Public repository.
+Name: «Росток» («sprout»: a thought that grows from a question; the method is still maieutics, Socrates' "midwifery" of ideas). The OKR text of the assignment is one example among others, not the product's subject. Author credit: Алексей Клушин, GitHub AlexKlush. Public repository.
 
 ## Evidence on Hand
 

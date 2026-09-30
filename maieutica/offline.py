@@ -190,14 +190,22 @@ def _judge_application(lesson: Lesson, t: str, words: int, extra: str) -> tuple[
         hit = sum(1 for f in flaws if f.strip() and len(stems(f) & stems(t)) >= 1)
         verdict = "correct" if flaws and hit >= max(2, math.ceil(len(flaws) / 2)) else ("partially_correct" if hit or words >= 8 else "incorrect")
         return [], [], verdict
-    numbers = len(re.findall(r"\d+", t))
-    tasks = len(_TASKS.findall(t))
-    mis = [{"id": "kr_are_tasks", "quote": t[:120]}] if tasks and numbers < 2 and lesson.misconception("kr_are_tasks") else []
+    if lesson.misconception("kr_are_tasks"):  # урок про цели и метрики: в решении должны быть числа, а не список дел
+        numbers = len(re.findall(r"\d+", t))
+        tasks = len(_TASKS.findall(t))
+        mis = [{"id": "kr_are_tasks", "quote": t[:120]}] if tasks and numbers < 2 else []
+        if words < 8:
+            return [], mis, "incorrect"
+        if numbers >= 3 and not tasks:
+            return [1, 2, 3, 4], [], "correct"
+        return [1], mis, "partially_correct"
+    # любой другой материал: решение засчитываем, если оно по теме, конкретное и с объяснением «почему»
+    on_topic = len(stems(t) & _vocab(lesson)[0])
     if words < 8:
-        return [], mis, "incorrect"
-    if numbers >= 3 and not tasks:
-        return [1, 2, 3, 4], [], "correct"
-    return [1], mis, "partially_correct"
+        return [], [], "incorrect"
+    if words >= 20 and on_topic >= 3 and (_CAUSAL.search(t) or _EXAMPLE.search(t)):
+        return [1, 2, 3], [], "correct"
+    return [1], [], "partially_correct"
 
 
 # --- генерация реплики -------------------------------------------------------------------------------------------
@@ -228,7 +236,7 @@ _EMPATHY = {
 }
 _GENERIC_Q = {
     "probe_clarify": "Что ещё вы могли бы добавить к сказанному?",
-    "perspective": "Как это выглядит глазами обычного сотрудника?",
+    "perspective": "Как это выглядит с другой стороны — глазами того, кого это касается?",
     "probe_reasons": "Почему, по-вашему, это так?",
     "probe_assumptions": "На чём основан такой вывод — и что, если это допущение неверно?",
     "counterexample": "Всегда ли это так? Попробуйте придумать случай, где это не работает.",

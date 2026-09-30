@@ -19,11 +19,42 @@ from urllib.parse import parse_qs
 
 import httpx
 
-from maieutica import load_lesson, offline
+from maieutica import load_lesson, materials, offline
 
 ROLES = {"system", "user", "assistant", "function"}
 MODELS = ("GigaChat-2", "GigaChat-2-Pro", "GigaChat-2-Max", "GigaChat-3-Ultra")
 REPLY = "Интересная мысль. А как бы вы объяснили это человеку, который впервые слышит про OKR?"
+
+
+def material(topic: str) -> str:
+    t = topic.strip(" .?!") or "Тема"
+    t = t[:1].upper() + t[1:]
+    return (f"{t}\n\n{t} — это понятие, которое удобно разобрать по шагам: что это такое, как оно устроено и где встречается. "
+            f"Сначала важно дать определение и отделить главное от второстепенного.\n\n"
+            f"Устройство темы «{t}» проще понять через причины и следствия. Каждое свойство возникает не само по себе, а из-за условий, "
+            f"в которых оно проявляется, поэтому полезно спрашивать, что будет, если условие изменится.\n\n"
+            f"На практике тема «{t}» встречается чаще, чем кажется. Если заметить её в знакомой ситуации, "
+            f"её легче запомнить и применить: пример из жизни работает лучше заученного определения.")
+
+
+def lesson_map(text: str) -> dict:
+    """Аргументы build_lesson_map, как их вернул бы GigaChat, но собранные правилами (materials.build)."""
+    lesson = materials.build(text)
+    concepts = [{"id": c.id, "title": c.title, "short": c.short, "bloom": c.bloom, "expectation": c.expectation, "key_points": c.key_points,
+                 "q_open": c.questions.get("open", ""), "q_reasons": c.questions.get("reasons", ""), "q_implications": c.questions.get("implications", ""),
+                 "hints": c.hints} for c in lesson.concepts]
+    first = lesson.concepts[0]
+    return {
+        "title": lesson.title,
+        "goal": lesson.goal,
+        "promise": lesson.promise,
+        "concepts": concepts,
+        "misconceptions": [{"id": "only_words", "concepts": [first.id], "belief": f"Достаточно запомнить определение: {first.title.lower()}.",
+                            "why_wrong": "Определение без понимания причин не помогает применить материал.",
+                            "counterexample": "Если вы знаете определение, но не можете объяснить его на примере, — вы это поняли?"}],
+        "cases": [{"title": "Новая ситуация", "prompt": "Представьте, что вам нужно объяснить этот материал другу, который о нём не слышал."}],
+        "flawed_examples": [],
+    }
 
 
 class FakeGigaChat:
@@ -36,6 +67,7 @@ class FakeGigaChat:
         self.delay = delay  # имитация задержки настоящего API (для ручной проверки анимаций)
         self.calls: list[dict] = []
         self.lesson = load_lesson("okr")
+        self.built: list = []
 
     def respond(self, method: str, path: str, headers: dict, raw: bytes) -> tuple[int, dict]:
         is_json = headers.get("content-type", "").startswith("application/json")
@@ -68,15 +100,24 @@ class FakeGigaChat:
         if model in self.exhausted:
             return 402, {"status": 402, "message": "Payment Required"}
         message: dict = {"role": "assistant", "content": REPLY}
+        if msgs[0]["content"].startswith("Ты — автор учебных конспектов"):  # тема → конспект
+            message["content"] = material(msgs[-1]["content"].split(":", 1)[-1].strip())
         fn = (body.get("function_call") or {}).get("name")
         if body.get("functions") is not None and fn not in {f["name"] for f in body["functions"]}:
             return 400, {"status": 400, "message": "function_call must name one of functions"}
         if fn == "assess_student_turn":
             user = msgs[-1]["content"]
-            target = (re.search(r"ЦЕЛЕВОЕ ПОНЯТИЕ: \[(\w+)\]", user) or [None, self.lesson.curriculum[0]])[1]
+            target = (re.search(r"ЦЕЛЕВОЕ ПОНЯТИЕ: \[(\w+)\]", user) or [None, ""])[1]
             student = user.split("РЕПЛИКА УЧЕНИКА (оцени её)\n", 1)[-1]
-            args = offline.analyze(self.lesson, target, "explore", student)[1].args
+            prompt = " ".join(m["content"] for m in msgs)
+            lesson = next((x for x in [*self.built, self.lesson] if target in x.curriculum and all(c.title in prompt for c in x.concepts[:2])), None)
+            lesson = lesson or next((x for x in [*self.built, self.lesson] if target in x.curriculum), self.lesson)
+            args = offline.analyze(lesson, target if target in lesson.curriculum else lesson.curriculum[0], "explore", student)[1].args
             message = {"role": "assistant", "content": "", "function_call": {"name": fn, "arguments": args}}
+        elif fn == "build_lesson_map":  # карту «от GigaChat» собираем правилами — заглушке важен путь, а не качество
+            text = msgs[-1]["content"].split("\n", 1)[-1]
+            self.built.append(materials.build(text))  # чтобы потом диагностировать ответы по этой же карте
+            message = {"role": "assistant", "content": "", "function_call": {"name": fn, "arguments": lesson_map(text)}}
         elif fn == "audit_tutor_reply":
             args = {"reveals_answer": False, "false_praise": False, "invented_facts": False, "ignores_move": False, "comment": ""}
             message = {"role": "assistant", "content": "", "function_call": {"name": fn, "arguments": args}}
