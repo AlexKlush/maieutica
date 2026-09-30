@@ -44,7 +44,7 @@ def student_reply(llm: GigaChat, model: str, persona: dict, text: str, dialogue:
 
 
 def run_pipeline(llm: GigaChat, lesson, persona: dict, turns: int, student_model: str, models: dict) -> dict:
-    tutor = Tutor(lesson, llm, models)
+    tutor = Tutor(lesson, llm, models, allow_offline=False)  # в оценке сбой LLM не подменяем правилами
     first = tutor.start()
     dialogue = [{"role": "tutor", "content": first.reply}]
     for _ in range(turns):

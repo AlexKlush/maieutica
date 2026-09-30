@@ -6,11 +6,11 @@ import uuid
 from dataclasses import asdict, dataclass, field
 from typing import Callable
 
-from . import analyzer, generator, verifier
+from . import analyzer, generator, offline, verifier
 from .analyzer import Analysis
 from .learner import LearnerModel
 from .lesson import Lesson
-from .llm import GigaChat, LLMError, LLMResult
+from .llm import GigaChat, LLMError, LLMResult, LLMUnavailable
 from .policy import COMPLETE, PHASES, DialogueState, Plan, Policy
 
 DEFAULT_MODELS = {"analyzer": "GigaChat-2-Max", "generator": "GigaChat-2-Max", "verifier": "GigaChat-2-Max"}
@@ -49,6 +49,8 @@ class TurnTrace:
     verifier: dict = field(default_factory=dict)
     mastery: dict[str, float] = field(default_factory=dict)
     total_latency: float = 0.0
+    offline: bool = False
+    note: str = ""
 
     @property
     def tokens(self) -> int:
@@ -64,9 +66,12 @@ def last_question(text: str) -> str:
 
 
 class Tutor:
-    def __init__(self, lesson: Lesson, llm: GigaChat | None, models: dict | None = None, address: str = "вы", verify: bool = True):
+    def __init__(self, lesson: Lesson, llm: GigaChat | None, models: dict | None = None, address: str = "вы", verify: bool = True, allow_offline: bool = True):
         self.lesson = lesson
         self.llm = llm
+        # allow_offline=False — для оценки качества (eval): любой сбой LLM должен быть виден, а не подменяться правилами.
+        self.allow_offline = allow_offline
+        self.offline_reason = "" if llm else "ключ GIGACHAT_CREDENTIALS не задан"
         self.models = {**DEFAULT_MODELS, **(models or {})}
         self.address = address
         self.verify = verify
@@ -105,7 +110,7 @@ class Tutor:
 
         notify("analyze", "Диагностика ответа")
         active = sorted({m for s in self.lm.concepts.values() for m in s.active_misconceptions})
-        a, res = analyzer.analyze(self.llm, self.models["analyzer"], self.lesson, self.state.target, PHASES[self.state.phase], last_tutor, student, prior, self.session_id, extra=self._extra(), active=active)
+        a, res = self._analyze(student, last_tutor, prior, active)
         stages.append(Stage.from_result("analyze", "Диагностика", res))
 
         notify("model", "Обновление модели ученика")
@@ -183,23 +188,28 @@ class Tutor:
 
     def _compose(self, plan: Plan, a: Analysis | None, last_tutor: str, student: str, stages: list[Stage], notify) -> tuple[str, dict]:
         notify("generate", "Генерация реплики")
-        g = generator.generate(self.llm, self.models["generator"], self.lesson, plan, a, self.lm, self.history, self.address, session_id=self.session_id)
+        g = self._generate(plan, a)
         stages.append(Stage.from_result("generate", "Генерация", g))
         text = verifier.clean(g.content)
         issues = verifier.rule_check(text, plan)
         llm_issues: list[str] = []
         checked = False
-        if not issues and self.verify and verifier.needs_llm(plan, a):
+        if not issues and self.verify and self._online() and verifier.needs_llm(plan, a):
             notify("verify", "Проверка на утечку ответа")
-            llm_issues, vr = verifier.llm_check(self.llm, self.models["verifier"], self.lesson, plan, a, text, last_tutor, student, self.session_id, covered=self.lm.concepts[plan.target].covered)
-            stages.append(Stage.from_result("verify", "Проверка", vr, "ok" if not llm_issues else "отклонено"))
-            checked = True
+            try:
+                llm_issues, vr = verifier.llm_check(self.llm, self.models["verifier"], self.lesson, plan, a, text, last_tutor, student, self.session_id, covered=self.lm.concepts[plan.target].covered)
+                stages.append(Stage.from_result("verify", "Проверка", vr, "ok" if not llm_issues else "отклонено"))
+                checked = True
+            except LLMError as e:
+                if not self.allow_offline:
+                    raise
+                self._degrade(e)
         info = {"ok": not (issues or llm_issues), "rule_issues": issues, "llm_issues": llm_issues, "checked_by_llm": checked, "regenerated": False, "fallback": False, "draft": ""}
-        if issues or llm_issues:
+        if (issues or llm_issues) and g.model != offline.MODEL:
             notify("regenerate", "Исправление черновика")
             info["draft"] = text
             feedback = " ".join(issues + llm_issues)
-            g2 = generator.generate(self.llm, self.models["generator"], self.lesson, plan, a, self.lm, self.history, self.address, feedback=feedback, session_id=self.session_id, temperature=0.4)
+            g2 = self._generate(plan, a, feedback, temperature=0.4)
             stages.append(Stage.from_result("regenerate", "Перегенерация", g2, feedback[:120]))
             text2 = verifier.clean(g2.content)
             issues2 = verifier.rule_check(text2, plan)
@@ -229,6 +239,41 @@ class Tutor:
                     return q
         return ""
 
+    def _online(self) -> bool:
+        """Идём ли в GigaChat: ключ есть и связь не оборвалась недавно. При allow_offline=False сбой не скрываем — всегда идём в LLM."""
+        if self.llm is None:
+            if not self.allow_offline:
+                raise LLMUnavailable(self.offline_reason)
+            return False
+        return not self.allow_offline or self.llm.available()
+
+    @property
+    def offline(self) -> bool:
+        return not self._online()
+
+    def _degrade(self, e: LLMError) -> None:
+        self.offline_reason = str(e)
+
+    def _analyze(self, student: str, last_tutor: str, prior: list[dict], active: list[str]) -> tuple[Analysis, LLMResult]:
+        if self._online():
+            try:
+                return analyzer.analyze(self.llm, self.models["analyzer"], self.lesson, self.state.target, PHASES[self.state.phase], last_tutor, student, prior, self.session_id, extra=self._extra(), active=active)
+            except LLMError as e:
+                if not self.allow_offline:
+                    raise
+                self._degrade(e)
+        return offline.analyze(self.lesson, self.state.target, self.state.phase, student, active, self._extra())
+
+    def _generate(self, plan: Plan, a: Analysis | None, feedback: str = "", temperature: float = 0.55) -> LLMResult:
+        if self._online():
+            try:
+                return generator.generate(self.llm, self.models["generator"], self.lesson, plan, a, self.lm, self.history, self.address, feedback=feedback, session_id=self.session_id, temperature=temperature)
+            except LLMError as e:
+                if not self.allow_offline:
+                    raise
+                self._degrade(e)
+        return offline.generate(self.lesson, plan, a, self.lm, self.state.last_question, self.history)
+
     def _extra(self) -> str:
         st = self.state
         if st.phase == "apply" and st.apply_step == 0:
@@ -243,6 +288,7 @@ class Tutor:
         return ""
 
     def _trace(self, student: str, reply: str, plan: Plan, a: Analysis | None, stages: list[Stage], vinfo: dict, latency: float) -> TurnTrace:
+        by_rules = any(st.model == offline.MODEL for st in stages)
         return TurnTrace(
             turn=len(self.traces),
             student=student,
@@ -258,6 +304,8 @@ class Tutor:
             verifier=vinfo,
             mastery={cid: round(s.p, 3) for cid, s in self.lm.concepts.items()},
             total_latency=round(latency, 2),
+            offline=by_rules,
+            note=self.offline_reason if by_rules else "",
         )
 
     def export(self) -> dict:
