@@ -79,7 +79,7 @@
       clearTimeout(p.live);
       if (p.thinkEl) {
         p.thinkEl.classList.add("out");
-        setTimeout(() => p.thinkEl.remove(), 300);
+        setTimeout(() => p.thinkEl.remove(), 420);
       }
       const rejected = st.rejected && st.rejected.id === p.id;
       if (rejected) {
@@ -490,12 +490,101 @@
     return el;
   }
 
-  function thinkingEl() {
+  // «Думаю»: росток прорастает, вокруг него — то, что сейчас происходит (читает, выбирает ход, пишет, проверяет),
+  // ниже — живой список пройденных стадий со временем, призрачные строки будущего ответа и, если ждать долго, подсказки.
+  const MODES = { read: "read", analyze: "read", model: "plan", plan: "plan", generate: "write", regenerate: "write", write: "write",
+    open: "write", rules: "plan", verify: "check", map: "map" };
+  const TIPS = [
+    "Пока я думаю — попробуйте продолжить свою мысль ещё на шаг.",
+    "Сократ называл это майевтикой: мысль рождается у того, кто рассуждает.",
+    "Ошибка в рассуждении — не провал, а материал для следующего вопроса.",
+    "Подсказки идут по нарастающей: сначала направление, потом опора.",
+    "Что уже понятно, а что нет — в панели «Прогресс» справа.",
+  ];
+  const BUILD_TIPS = [
+    "Делю материал на смысловые части и ищу в каждой главное.",
+    "К каждой части готовлю открытый вопрос и три подсказки — от намёка до опоры.",
+    "Ищу, где легко ошибиться: на эти места будут контрпримеры.",
+    "Большой текст — дольше план. Обычно это занимает до минуты.",
+  ];
+  function thinkingEl(build) {
     const el = document.createElement("div");
-    el.className = "thinking";
+    el.className = "thinking" + (build ? " build" : "");
     el.setAttribute("role", "status");
-    el.innerHTML = `${LOGO}<span class="words"><span class="shimmer">Думаю</span><span class="stage"></span></span>`;
+    el.dataset.mode = build ? "map" : "read";
+    const motes = Array.from({ length: 7 }, (_, i) => `<i style="--i:${i}"></i>`).join("");
+    el.innerHTML = `<div class="think-head">
+        <span class="orb" aria-hidden="true">
+          <svg class="tring" viewBox="0 0 48 48"><circle class="r1" cx="24" cy="24" r="21" pathLength="100"/><circle class="r2" cx="24" cy="24" r="21" pathLength="100"/></svg>
+          <span class="orbit"><i></i><i></i><i></i></span>
+          <span class="motes">${motes}</span>${LOGO}
+        </span>
+        <span class="words"><span class="shimmer">Думаю</span><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="stage"></span><span class="clock"></span></span>
+      </div>
+      <ol class="trail" aria-hidden="true"></ol>
+      <div class="ghost" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="tiles" aria-hidden="true">${Array.from({ length: 6 }, (_, i) => `<i style="--i:${i}"></i>`).join("")}</div>
+      <p class="tip" aria-live="off"></p>`;
     return el;
+  }
+
+  function setStage(p, label, key) {
+    if (!p.thinkEl || !label || p.stageLabel === label) return;
+    const now = performance.now();
+    const el = p.thinkEl;
+    const trail = $(".trail", el);
+    const cur = $("li.now", trail);
+    if (cur) {
+      cur.classList.remove("now");
+      cur.classList.add("done");
+      $("em", cur).textContent = num((now - p.stageT0) / 1000, 1) + " с";
+    }
+    const li = document.createElement("li");
+    li.className = "now";
+    li.innerHTML = `<b></b><span></span><em></em>`;
+    $("span", li).textContent = label;
+    trail.appendChild(li);
+    while (trail.children.length > 5) trail.firstElementChild.remove();
+    p.stageLabel = label;
+    p.stageT0 = now;
+    el.dataset.mode = MODES[key] || el.dataset.mode || "read";
+    el.classList.remove("pop");
+    void el.offsetWidth;
+    el.classList.add("pop");  // на каждую новую стадию росток «выпускает» пыльцу
+    swapText($(".stage", el), label);
+  }
+
+  function watchStages(p) {
+    let tipN = 0;
+    const tick = () => {
+      if (pending !== p) return;
+      let t = "";
+      let key = "";
+      try {
+        const el = window.parent.document.querySelector(".mx-live");
+        t = el ? el.textContent.trim() : "";
+        key = el ? el.dataset.key || "" : "";
+      } catch (e) { /* другой origin — стадии просто не показываем */ }
+      if (t) setStage(p, t, key);
+      const spent = (performance.now() - p.t0) / 1000;
+      if (p.thinkEl) {
+        const clock = $(".clock", p.thinkEl);
+        if (spent >= 2) clock.textContent = Math.floor(spent) + " с";
+        p.thinkEl.style.setProperty("--spent", Math.min(1, spent / 60).toFixed(3));  // дуга прогресса для долгого плана
+        const tips = p.thinkEl.classList.contains("build") ? BUILD_TIPS : TIPS;
+        const due = spent < 6 ? 0 : 1 + Math.floor((spent - 6) / 7);
+        if (due > tipN) {
+          tipN = due;
+          const tip = $(".tip", p.thinkEl);
+          tip.classList.remove("on");
+          void tip.offsetWidth;
+          tip.textContent = tips[(due - 1) % tips.length];
+          tip.classList.add("on");
+        }
+      }
+      p.live = setTimeout(tick, 140);
+    };
+    tick();
   }
 
   function swapText(box, text) {
@@ -509,20 +598,6 @@
     const s = document.createElement("span");
     s.textContent = text;
     box.appendChild(s);
-  }
-
-  function watchStages(p) {
-    const tick = () => {
-      if (pending !== p) return;
-      let t = "";
-      try {
-        const el = window.parent.document.querySelector(".mx-live");
-        t = el ? el.textContent.trim() : "";
-      } catch (e) { /* другой origin — стадии просто не показываем */ }
-      if (t && p.thinkEl) swapText($(".stage", p.thinkEl), t);
-      p.live = setTimeout(tick, 140);
-    };
-    tick();
   }
 
   function summary(chat) {
@@ -617,8 +692,8 @@
       $("#thread").appendChild(p.studentEl);
     }
     if (o.think) {
-      p.thinkEl = thinkingEl();
-      if (o.first) swapText($(".stage", p.thinkEl), o.first);
+      p.thinkEl = thinkingEl(!!o.chat);
+      setStage(p, o.first || "читаю ответ", o.firstKey || (o.chat ? "read" : "analyze"));
       $("#thread").appendChild(p.thinkEl);
       watchStages(p);
     }
@@ -650,7 +725,7 @@
       const topic = looksLikeTopic(t);
       const title = topic ? t : guessTitle(t);
       const ok = submit("new", { text: t }, {
-        think: true, fromHome: true, first: topic ? "пишу конспект по теме" : "читаю материал",
+        think: true, fromHome: true, first: topic ? "пишу конспект по теме" : "читаю материал", firstKey: topic ? "write" : "read",
         chat: topic ? { kind: "topic", title: t, request: t } : { kind: "text", title, text: t },
       });
       if (ok) { input.value = ""; autosize(); }
@@ -1182,7 +1257,7 @@
       threadKey = "pending";
       $("#thread").innerHTML = "";
       $("#summary").innerHTML = "";
-      return submit("restart", {}, { think: true, first: "готовлю первый вопрос" });
+      return submit("restart", {}, { think: true, first: "готовлю первый вопрос", firstKey: "open" });
     }
     if ((el = hit("[data-model]"))) { closeMenus(); if (el.dataset.model !== S.settings.model) submit("model", { value: el.dataset.model }); return; }
     if ((el = hit("[data-act]"))) {

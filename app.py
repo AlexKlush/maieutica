@@ -348,8 +348,9 @@ def build_state() -> dict:
 
 # --- события из интерфейса ------------------------------------------------------------------------------------------
 
-def show(live, text: str) -> None:
-    live.markdown(f'<div class="mx-live">{html.escape(text)}</div>', unsafe_allow_html=True)
+def show(live, text: str, key: str = "") -> None:
+    # key — какая стадия идёт (интерфейс меняет под неё анимацию), text — что показать словами
+    live.markdown(f'<div class="mx-live" data-key="{html.escape(key)}">{html.escape(text)}</div>', unsafe_allow_html=True)
 
 
 def prepare(text: str, live) -> materials.Prepared:
@@ -376,7 +377,7 @@ def prepare(text: str, live) -> materials.Prepared:
             else:
                 label = STAGE_WORDS.get(k, "читаю материал")
             if label != shown:
-                show(live, label)
+                show(live, label, k or "read")
                 shown = label
             time.sleep(0.15)
         ready = job.result()
@@ -388,7 +389,7 @@ def prepare(text: str, live) -> materials.Prepared:
 
 
 def open_chat(chat: Chat, live) -> None:
-    show(live, STAGE_WORDS["open"])
+    show(live, STAGE_WORDS["open"], "open")
     chat_store().add(st.session_state.client, chat)
     st.session_state.active = chat.id
 
@@ -421,7 +422,7 @@ def handle(ev: dict) -> None:
     client = st.session_state.get("client")
 
     def on_stage(key: str, label: str) -> None:
-        show(live, STAGE_WORDS.get(key, label))
+        show(live, STAGE_WORDS.get(key, label), key)
 
     st.session_state.rejected = None
     try:
@@ -465,7 +466,7 @@ def handle(ev: dict) -> None:
                 elif kind == "jump" and ev.get("phase") in ("apply", "reflect") and not chat.tutor.finished:
                     chat.tutor.jump(ev["phase"], on_stage)
                 elif kind == "restart":
-                    show(live, STAGE_WORDS["open"])
+                    show(live, STAGE_WORDS["open"], "open")
                     chat.tutor = new_tutor(chat.lesson, chat.kind == "topic")
                 chat.updated = time.time()
         elif kind == "address" and ev.get("value") in ("вы", "ты"):
