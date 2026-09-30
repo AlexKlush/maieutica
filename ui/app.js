@@ -512,13 +512,8 @@
     el.className = "thinking" + (build ? " build" : "");
     el.setAttribute("role", "status");
     el.dataset.mode = build ? "map" : "read";
-    const motes = Array.from({ length: 7 }, (_, i) => `<i style="--i:${i}"></i>`).join("");
     el.innerHTML = `<div class="think-head">
-        <span class="orb" aria-hidden="true">
-          <svg class="tring" viewBox="0 0 48 48"><circle class="r1" cx="24" cy="24" r="21" pathLength="100"/><circle class="r2" cx="24" cy="24" r="21" pathLength="100"/></svg>
-          <span class="orbit"><i></i><i></i><i></i></span>
-          <span class="motes">${motes}</span>${LOGO}
-        </span>
+        <span class="orb" aria-hidden="true">${LOGO}</span>
         <span class="words"><span class="shimmer">Думаю</span><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="stage"></span><span class="clock"></span></span>
       </div>
       <ol class="trail" aria-hidden="true"></ol>

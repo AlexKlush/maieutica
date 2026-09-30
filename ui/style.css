@@ -378,27 +378,15 @@ body.no-trace .act.why { display: none; }
 .msg.user.sent .doc { animation: sendIn .6s var(--spring) both; transform-origin: 100% 100%; }
 .msg.brief .doc { width: min(460px, 100%); }
 
-/* думает: росток прорастает и «работает» по-разному на каждой стадии:
-   read — листья покачиваются, по строкам бежит взгляд; plan — вокруг кружат три семечка; write — поднимается пыльца, строки растут;
-   check — по кругу проходит луч проверки; map (план разбора) — кольцо заполняется, пока идёт долгий запрос. */
-.thinking { --lime-a: color-mix(in srgb, var(--lime) 70%, transparent); display: grid; gap: 10px; color: var(--ink-3); animation: rise .4s var(--ease) both; }
+/* думает: маленький росток покачивает листьями, рядом прыгают точки */
+.thinking { display: grid; gap: 10px; color: var(--ink-3); animation: rise .4s var(--ease) both; }
 .thinking.out { animation: thinkOut .42s var(--ease) forwards; }
-.think-head { display: flex; align-items: center; gap: 14px; min-height: 48px; }
-.orb { position: relative; width: 48px; height: 48px; flex: none; display: grid; place-items: center; margin-left: -12px; }
-.orb .logo { position: relative; z-index: 2; width: 26px; height: 26px; color: var(--ink); }
+.think-head { display: flex; align-items: center; gap: 10px; min-height: 30px; }
+.orb { width: 22px; height: 22px; flex: none; display: grid; place-items: center; }
+.orb .logo { width: 22px; height: 22px; color: var(--ink); }
 .orb .lg-stem { animation: grow .6s var(--ease) both, breathe 1.6s var(--ease-io) .8s infinite; }
 .orb .lg-l { animation: unfold .7s var(--spring) .25s both, sway 1.6s var(--ease-io) 1s infinite; }
 .orb .lg-r { animation: unfold .7s var(--spring) .4s both, sway 1.6s var(--ease-io) 1.25s infinite reverse; }
-.tring { position: absolute; inset: 0; width: 48px; height: 48px; transform: rotate(-90deg); overflow: visible; }
-.tring circle { fill: none; stroke-width: 1.6; }
-.tring .r1 { stroke: var(--line-2); stroke-dasharray: 2 6; animation: spin 14s linear infinite; transform-origin: 24px 24px; }
-.tring .r2 { stroke: var(--leaf); stroke-linecap: round; stroke-dasharray: 18 82; opacity: 0; transform-origin: 24px 24px; transition: opacity .4s var(--ease); }
-.orbit { position: absolute; inset: 0; opacity: 0; transition: opacity .4s var(--ease); }
-.orbit i { position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px; border-radius: 2px; background: var(--leaf);
-  animation: orbit 1.8s linear infinite; animation-delay: calc(var(--n, 0) * -0.6s); }
-.orbit i:nth-child(2) { --n: 1; opacity: .7; } .orbit i:nth-child(3) { --n: 2; opacity: .45; }
-.motes { position: absolute; inset: 0; pointer-events: none; }
-.motes i { position: absolute; left: calc(50% + (var(--i) - 3) * 4px); bottom: 12px; width: 4px; height: 4px; border-radius: 1px; background: var(--lime); opacity: 0; }
 .words { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 8px; font-size: 14px; }
 .shimmer {
   font-weight: 560; background: linear-gradient(90deg, var(--ink-3) 0%, var(--ink) 45%, var(--ink-3) 90%); background-size: 220% 100%;
@@ -414,7 +402,7 @@ body.no-trace .act.why { display: none; }
 .clock:empty { display: none; }
 
 /* пройденные стадии: галочка и время, текущая — пульсирует */
-.trail { list-style: none; margin: -4px 0 0 36px; padding: 0; display: grid; gap: 3px; font-size: 12.5px; }
+.trail { list-style: none; margin: -2px 0 0 32px; padding: 0; display: grid; gap: 3px; font-size: 12.5px; }
 .trail:empty { display: none; }
 .trail li { display: flex; align-items: center; gap: 8px; animation: trailIn .45s var(--ease) both; }
 .trail b { position: relative; width: 10px; height: 10px; flex: none; border-radius: 3px; border: 1.5px solid var(--line-3); }
@@ -426,13 +414,13 @@ body.no-trace .act.why { display: none; }
 .trail em { font-style: normal; font-variant-numeric: tabular-nums; opacity: .8; }
 
 /* призрачные строки будущего ответа: появляются, если ждать дольше мгновения */
-.ghost { display: grid; gap: 9px; margin: 2px 0 0 36px; max-width: 520px; opacity: 0; animation: fadeIn .6s var(--ease) .7s forwards; }
+.ghost { display: grid; gap: 9px; margin: 2px 0 0 32px; max-width: 520px; opacity: 0; animation: fadeIn .6s var(--ease) .7s forwards; }
 .ghost i { height: 9px; border-radius: 3px; background: linear-gradient(90deg, var(--hover) 0%, var(--press) 40%, var(--hover) 80%); background-size: 250% 100%;
   animation: shimmer 1.8s linear infinite, grow-x 3.2s var(--ease-io) infinite alternate; transform-origin: 0 50%; }
 .ghost i:nth-child(1) { width: 94%; } .ghost i:nth-child(2) { width: 81%; animation-delay: .2s, .5s; } .ghost i:nth-child(3) { width: 52%; animation-delay: .4s, 1s; }
 .thinking.build .ghost { display: none; }
 /* строится план: части материала по одной «прорастают» плитками, последняя — «Применение» */
-.tiles { display: none; gap: 6px; margin: 2px 0 0 36px; }
+.tiles { display: none; gap: 6px; margin: 2px 0 0 32px; }
 .thinking.build .tiles { display: flex; }
 .tiles i { width: 44px; height: 30px; border-radius: 6px; border: 1px solid var(--line-2); background: var(--surface); position: relative; overflow: hidden;
   animation: tile 4.8s var(--ease) infinite; animation-delay: calc(var(--i) * .45s); }
@@ -440,33 +428,11 @@ body.no-trace .act.why { display: none; }
 .tiles i:last-child { border-color: var(--leaf); }
 .tiles i:last-child::after { background: var(--leaf); }
 @keyframes tile { 0% { opacity: 0; transform: translateY(8px) scale(.85); } 12%, 78% { opacity: 1; transform: none; } 90%, 100% { opacity: 0; transform: translateY(-4px); } }
-.tip { margin: 2px 0 0 36px; max-width: 520px; min-height: 1.4em; font: italic 14px/1.5 var(--serif); color: var(--ink-3); opacity: 0; }
+.tip { margin: 2px 0 0 32px; max-width: 520px; min-height: 1.4em; font: italic 14px/1.5 var(--serif); color: var(--ink-3); opacity: 0; }
 .tip.on { animation: tipIn .7s var(--ease) both; }
-
-/* режимы по стадиям */
-.thinking[data-mode="read"] .ghost i { animation-duration: 1.2s, 3.2s; }
-.thinking[data-mode="read"] .orb::after { content: ""; position: absolute; left: 10px; right: 10px; height: 2px; border-radius: 1px; background: var(--lime-a); animation: scanY 1.6s var(--ease-io) infinite; }
-.thinking[data-mode="plan"] .orbit { opacity: 1; }
-.thinking[data-mode="plan"] .tring .r1 { animation-duration: 4s; }
-.thinking[data-mode="write"] .motes i { animation: mote 1.9s var(--ease) infinite; animation-delay: calc(var(--i) * .27s); }
-.thinking[data-mode="write"] .ghost i { animation: shimmer 1.8s linear infinite, type-x 2.4s var(--ease-io) infinite; }
-.thinking[data-mode="write"] .ghost i:nth-child(2) { animation-delay: .2s, .35s; } .thinking[data-mode="write"] .ghost i:nth-child(3) { animation-delay: .4s, .7s; }
-.thinking[data-mode="check"] .tring .r2 { opacity: 1; animation: spin 1.1s linear infinite; }
-.thinking[data-mode="check"] .orb .logo { animation: checkPulse 1.1s var(--ease-io) infinite; }
-.thinking[data-mode="map"] .tring .r2 { opacity: 1; stroke-dasharray: calc(4 + var(--spent, 0) * 92) 100; transition: stroke-dasharray .6s var(--ease), opacity .4s; }
-.thinking[data-mode="map"] .orbit { opacity: 1; }
-.thinking[data-mode="map"] .orbit i { animation-duration: 3s; }
-.thinking.pop .motes i { animation: burst .9s var(--ease) both; animation-delay: calc(var(--i) * 25ms); }
-.thinking.pop[data-mode="write"] .motes i { animation: burst .9s var(--ease) both, mote 1.9s var(--ease) .9s infinite; animation-delay: calc(var(--i) * 25ms), calc(.9s + var(--i) * .27s); }
 
 @keyframes thinkOut { to { opacity: 0; transform: translateY(-6px) scale(.98); filter: blur(3px); } }
 @keyframes hop { 0%, 60%, 100% { transform: translateY(0); opacity: .45; } 30% { transform: translateY(-4px); opacity: 1; } }
-@keyframes orbit { from { transform: rotate(0) translateX(21px) rotate(0); } to { transform: rotate(360deg) translateX(21px) rotate(-360deg); } }
-@keyframes mote { 0% { opacity: 0; transform: translate(0, 0) scale(.6); } 20% { opacity: .9; } 100% { opacity: 0; transform: translate(calc((var(--i) - 3) * 3px), -30px) scale(1) rotate(90deg); } }
-@keyframes burst { 0% { opacity: 1; transform: translate(0, 0) scale(.4); }
-  100% { opacity: 0; transform: translate(calc((var(--i) - 3) * 7px), calc(-14px - var(--i) * 2px)) scale(1.1) rotate(120deg); } }
-@keyframes scanY { 0%, 100% { top: 14px; opacity: 0; } 15%, 85% { opacity: 1; } 50% { top: 32px; } }
-@keyframes checkPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
 @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 var(--glow); } 50% { box-shadow: 0 0 0 4px var(--glow); } }
 @keyframes tick { from { opacity: 0; transform: rotate(45deg) scale(.3); } to { opacity: 1; transform: rotate(45deg); } }
 @keyframes trailIn { from { opacity: 0; transform: translateX(-6px); } }
